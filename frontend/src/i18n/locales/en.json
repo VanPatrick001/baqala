@@ -1,0 +1,211 @@
+{
+  "common": {
+    "save": "Save", "cancel": "Cancel", "close": "Close", "add": "Add", "edit": "Edit", "delete": "Delete", "change": "Change",
+    "search": "Search…", "all": "All", "allStatuses": "All statuses", "status": "Status", "date": "Date", "amount": "Amount",
+    "total": "Total", "user": "User", "notes": "Notes", "description": "Description", "print": "Print", "from": "From", "to": "To",
+    "days": "days", "active": "Active", "inactive": "Inactive", "enabled": "Enabled", "noData": "Nothing to show yet.",
+    "saved": "Saved.", "deleted": "Deleted.", "previous": "Previous", "next": "Next", "pageOf": "Page {{page}} of {{pages}}"
+  },
+  "nav": {
+    "dashboard": "Dashboard", "pos": "Point of sale", "sales": "Sales", "products": "Products", "inventory": "Inventory",
+    "purchases": "Purchases", "customers": "Customers", "cash": "Cash & expenses", "reports": "Reports", "agent": "Smart Agent", "settings": "Settings"
+  },
+  "roles": { "ADMIN": "Administrator", "MANAGER": "Manager", "CASHIER": "Cashier" },
+  "auth": {
+    "tagline": "Smart grocery store management", "username": "Username", "password": "Password", "login": "Sign in", "logout": "Sign out",
+    "defaultHint": "First sign-in: admin / Admin@123", "changePassword": "Change password", "currentPassword": "Current password",
+    "newPassword": "New password", "confirmPassword": "Confirm new password", "passwordRule": "At least 8 characters.",
+    "passwordsDontMatch": "The two passwords do not match.", "passwordChanged": "Password changed.",
+    "mustChange": "For security, please choose a new password before continuing."
+  },
+  "kpi": {
+    "revenue": "Revenue (incl. tax)", "revenueNet": "Revenue (excl. tax)", "grossMargin": "Gross margin", "netMargin": "Net margin",
+    "taxDue": "Tax due", "taxCollected": "Tax collected", "collected": "Collected", "deductible": "Deductible", "tickets": "Tickets",
+    "avgBasket": "Average basket", "expenses": "Operating expenses", "shrinkage": "Losses", "netCashFlow": "Net cash flow",
+    "in": "In", "out": "Out", "smartAgent": "Open alerts", "critical": "{{count}} critical", "stockIssues": "{{low}} low, {{out}} out of stock"
+  },
+  "dashboard": {
+    "title": "Dashboard", "vsPrevious": "vs previous period", "salesTrend": "Revenue and gross margin per day",
+    "paymentMix": "Payments by method", "topProducts": "Top products by revenue", "byCategory": "Revenue by category",
+    "presets": { "today": "Today", "week": "7 days", "month": "30 days", "year": "12 months" }
+  },
+  "pos": {
+    "noSession": "The till is closed", "openSessionHint": "Count the opening float and open the till to start selling.",
+    "scanPlaceholder": "Scan a barcode or search a product…", "walkIn": "Walk-in customer", "session": "Session",
+    "emptyCart": "Scan or tap a product to start a sale.", "discount": "Discount", "subtotal": "Subtotal (excl. tax)", "tax": "Tax",
+    "total": "Total", "clear": "Clear", "pay": "Pay", "inStock": "Stock", "oftenBoughtWith": "Often bought together",
+    "outOfStockWarning": "{{name}} is out of stock.", "productNotFound": "No product matches \"{{code}}\".",
+    "payment": "Payment", "remaining": "Remaining", "changeDue": "Change to give", "addPayment": "Add",
+    "confirmPayment": "Confirm payment", "reference": "Reference", "payExact": "Pay exact amount by {{method}}",
+    "creditAvailable": "Credit available: {{amount}}", "saleCompleted": "Sale completed", "newSale": "New sale",
+    "printReceipt": "Print receipt", "selectCustomer": "Customer"
+  },
+  "paymentMethods": { "CASH": "Cash", "CARD": "Card", "MOBILE": "Mobile wallet", "CREDIT": "Customer credit", "BANK": "Bank transfer" },
+  "receipt": {
+    "number": "Receipt no.", "date": "Date", "cashier": "Cashier", "customer": "Customer", "subtotal": "Subtotal (excl. tax)",
+    "discount": "Discounts", "total": "TOTAL", "change": "Change", "customerBalance": "Customer balance", "thanks": "Thank you for your visit!",
+    "taxNumber": "Tax no.", "voided": "VOIDED"
+  },
+  "products": {
+    "title": "Products", "count": "{{count}} products", "new": "New product", "edit": "Edit product", "name": "Product",
+    "sku": "SKU", "barcode": "Barcode", "barcodeHint": "Scan it directly into this field.", "category": "Category", "unit": "Unit",
+    "supplier": "Supplier", "purchasePrice": "Purchase price", "salePrice": "Sale price", "marginHint": "Margin on sale price: {{pct}}%",
+    "minStock": "Alert threshold", "minStockHint": "An alert is raised at or below this quantity.", "reorderQty": "Reorder quantity",
+    "stock": "Stock", "min": "Min", "nextExpiry": "Next expiry", "taxes": "Taxes", "trackExpiry": "Track expiry dates",
+    "isWeighed": "Sold by weight", "isActive": "Active (sold at the till)", "initialStock": "Opening stock", "batchNo": "Batch no.",
+    "expiryDate": "Expiry date", "searchPlaceholder": "Name, SKU or barcode…", "allCategories": "All categories",
+    "allStatuses": "All stock levels", "onPromo": "Promo", "confirmDelete": "Delete {{name}}? Its sales history is kept.",
+    "status": { "ALERT": "Needs attention", "LOW": "Low stock", "OUT": "Out of stock", "OK": "In stock" }
+  },
+  "units": { "PCS": "Piece", "KG": "Kilogram", "G": "Gram", "L": "Litre", "ML": "Millilitre", "PACK": "Pack", "BOX": "Box" },
+  "inventory": {
+    "title": "Inventory", "recordWaste": "Record a loss", "adjust": "Stock count", "stockValue": "Stock value (cost)",
+    "retailValue": "At sale price", "products": "Products", "lowStock": "Low stock", "outOfStock": "Out of stock",
+    "expiring": "Batches expiring soon", "expired": "Expired",
+    "tabs": { "movements": "Stock movements", "expiry": "Expiry dates", "alerts": "Low stock" },
+    "allTypes": "All movement types", "type": "Type", "quantity": "Quantity", "unitCost": "Unit cost", "balance": "Balance",
+    "batch": "Batch", "reason": "Reason", "expiringWithin": "Expiring within", "daysLeft": "Days left", "valueAtRisk": "Value at risk",
+    "noLowStock": "No product is below its alert threshold.", "currentStock": "Current stock", "quantityLost": "Quantity lost",
+    "countedQty": "Quantity counted", "adjustHint": "Enter what is physically on the shelf; the difference is recorded.",
+    "fefoAuto": "Automatic (first to expire first)",
+    "reasons": { "expired": "Expired", "damaged": "Damaged", "theft": "Theft", "spoiled": "Spoiled", "count": "Periodic count", "correction": "Data correction" }
+  },
+  "movementTypes": {
+    "PURCHASE": "Purchase", "SALE": "Sale", "SALE_RETURN": "Sale return", "WASTE": "Loss / waste", "ADJUSTMENT_IN": "Adjustment (+)",
+    "ADJUSTMENT_OUT": "Adjustment (−)", "SUPPLIER_RETURN": "Return to supplier", "OPENING": "Opening stock"
+  },
+  "references": { "sale": "Sale", "purchase": "Purchase", "adjustment": "Adjustment", "waste": "Loss", "product": "Product", "customer": "Customer" },
+  "purchases": {
+    "title": "Purchases", "orders": "Purchase orders", "new": "New purchase", "order": "Purchase", "number": "No.", "supplier": "Supplier",
+    "payment": "Payment", "taxPaid": "Tax paid (deductible)", "paid": "Paid", "invoiceNo": "Supplier invoice no.", "unitCost": "Unit cost (excl. tax)",
+    "net": "Net", "tax": "Tax", "addLine": "Add a line", "saveDraft": "Save draft", "receive": "Receive goods",
+    "cancelOrder": "Cancel order", "recordPayment": "Pay supplier", "pay": "Pay", "estimatedNet": "Estimated total (excl. tax)",
+    "status": { "DRAFT": "Draft", "RECEIVED": "Received", "CANCELLED": "Cancelled" },
+    "paymentStatus": { "UNPAID": "Unpaid", "PARTIAL": "Partly paid", "PAID": "Paid" }
+  },
+  "suppliers": {
+    "title": "Suppliers", "new": "New supplier", "edit": "Edit supplier", "name": "Name", "contact": "Contact person",
+    "leadTime": "Delivery time (days)", "leadTimeHint": "Used by the Smart Agent to time reorders.", "balance": "Amount owed", "taxNumber": "Tax no."
+  },
+  "customers": {
+    "title": "Customers", "new": "New customer", "edit": "Edit customer", "code": "Code", "fullName": "Full name", "phone": "Phone",
+    "email": "Email", "address": "Address", "creditLimit": "Credit limit", "creditLimitHint": "0 means no credit sales allowed.",
+    "balance": "Debt", "totalDebt": "Total customer debt: {{amount}}", "totalSpent": "Total spent", "purchases": "Purchases",
+    "repayment": "Repayment amount", "recordRepayment": "Record repayment", "repaymentRecorded": "Repayment recorded.", "ledger": "Account history"
+  },
+  "ledgerTypes": { "CREDIT_SALE": "Credit sale", "REPAYMENT": "Repayment", "SALE_VOID": "Sale voided", "ADJUSTMENT": "Adjustment" },
+  "cash": {
+    "title": "Cash & expenses", "currentSession": "Current session", "movements": "Cash movements", "history": "Session history",
+    "noOpenSession": "No session is open on this till.", "openingFloat": "Opening float", "openSession": "Open the till",
+    "sessionOpened": "Till opened.", "openedBy": "Opened by {{name}}", "expectedCash": "Expected cash in drawer", "salesTotal": "Sales",
+    "voided": "voided", "cashIn": "Cash in", "expense": "Record an expense", "closeSession": "Close the till",
+    "byPaymentMethod": "Takings by payment method", "drawerMovements": "Movements this session", "countedCash": "Cash counted",
+    "difference": "Difference", "confirmClose": "Close and print Z report", "zReport": "Z report", "category": "Category",
+    "method": "Paid by", "amountInclTax": "Amount including tax.", "deductibleTax": "Deductible tax", "noTax": "No tax",
+    "in": "In", "out": "Out", "opened": "Opened", "closed": "Closed", "open": "Open"
+  },
+  "cashCategories": {
+    "SALE": "Sales", "SALE_REFUND": "Refund / void", "CUSTOMER_REPAYMENT": "Customer repayment", "SUPPLIER_PAYMENT": "Supplier payment",
+    "CASH_DEPOSIT": "Cash added to drawer", "CASH_WITHDRAWAL": "Cash removed / banked", "OWNER_CONTRIBUTION": "Owner contribution",
+    "OWNER_DRAWING": "Owner drawing", "RENT": "Rent", "SALARY": "Salaries", "UTILITIES": "Electricity, water, gas",
+    "TRANSPORT": "Transport", "MAINTENANCE": "Maintenance", "OTHER_EXPENSE": "Other expense", "OTHER_INCOME": "Other income"
+  },
+  "sales": {
+    "title": "Sales", "summary": "{{count}} tickets · {{amount}}", "searchPlaceholder": "Receipt no. or customer…", "receipt": "Receipt",
+    "cashier": "Cashier", "customer": "Customer", "methods": "Payment", "items": "Lines", "void": "Void sale", "voidReason": "Reason for voiding",
+    "confirmVoid": "Void this sale (stock and payments are reversed)", "voidedOk": "Sale voided.", "receiptLanguage": "Receipt language",
+    "status": { "COMPLETED": "Completed", "VOIDED": "Voided" }
+  },
+  "reports": {
+    "title": "Financial reports", "financialSummary": "Financial summary", "periodChart": "Revenue and net margin",
+    "periodTable": "Periodic statement", "period": "Period", "taxReport": "Tax: collected vs deductible", "taxCollected": "Collected",
+    "taxPaid": "Deductible", "taxDue": "Due", "qtySold": "Qty sold",
+    "granularity": { "DAY": "Daily", "WEEK": "Weekly", "MONTH": "Monthly", "YEAR": "Yearly" },
+    "rows": {
+      "tickets": "Tickets", "revenue_gross": "Revenue (incl. tax)", "discounts": "Discounts", "revenue_net": "Revenue (excl. tax)",
+      "cogs": "Cost of goods sold", "gross_margin": "Gross margin", "gross_margin_pct": "Gross margin %", "operating_expenses": "Operating expenses",
+      "shrinkage_cost": "Losses & shrinkage", "net_margin": "Net margin", "net_margin_pct": "Net margin %", "tax_collected": "Tax collected",
+      "tax_deductible": "Deductible tax", "tax_due": "Tax due", "cash_in": "Cash in", "cash_out": "Cash out", "net_cash_flow": "Net cash flow",
+      "avg_basket": "Average basket"
+    }
+  },
+  "alertTypes": {
+    "LOW_STOCK": "Low stock", "OUT_OF_STOCK": "Out of stock", "NEAR_EXPIRY": "Expiring soon", "EXPIRED": "Expired", "REORDER": "Reorder",
+    "ANOMALY": "Anomaly", "PROMOTION": "Promotion idea", "CROSS_SELL": "Cross-selling", "CREDIT_RISK": "Credit risk"
+  },
+  "agent": {
+    "title": "Smart Agent", "runNow": "Analyse now", "runDone": "Analysis complete.", "lastRun": "Last analysis: {{date}}",
+    "intro": "The Smart Agent analyses sales speed, stock, expiry dates, losses, cash sessions and baskets every hour and when the till closes. It recommends reorders, flags anomalies, suggests promotions and finds products bought together.",
+    "groups": { "all": "All", "stock": "Stock & reorders", "expiry": "Expiry", "anomalies": "Anomalies", "promotions": "Promotions", "crossSell": "Cross-selling" },
+    "noAlerts": "All clear: nothing needs your attention.", "acknowledged": "Seen", "ack": "Mark as seen", "dismiss": "Dismiss",
+    "applyPromotion": "Apply −{{pct}}%", "applyPrice": "Apply suggested price", "order": "Create purchase order",
+    "selectAllReorders": "Select all", "createDrafts": "Create purchase orders ({{count}})", "draftsCreated": "{{count}} draft purchase order(s) created.",
+    "promotionApplied": "Promotion applied at the till.", "priceApplied": "Price updated.",
+    "associations": "Products bought together", "ifBuys": "Customer buys", "alsoBuys": "Also buys", "confidence": "Confidence", "lift": "Lift", "pairs": "Baskets",
+    "lowStock": "{{product}} is low: {{stock}} left (alert threshold {{min}}).",
+    "outOfStock": "{{product}} is out of stock.",
+    "nearExpiry": "{{qty}} × {{product}} (batch {{batch}}) expire on {{expiry}}, in {{daysLeft}} days. Value at risk: {{valueAtRisk}}.",
+    "expired": "{{qty}} × {{product}} (batch {{batch}}) expired on {{expiry}}. Remove them from the shelf and record the loss.",
+    "reorder": "Reorder {{suggestedQty}} × {{product}} from {{supplier}} (about {{estimatedCost}}). It sells {{velocityPerDay}}/day and the stock will last {{daysOfStockLeft}} days, while delivery takes {{leadTimeDays}} days.",
+    "creditRisk": "{{customer}} owes {{balance}}, {{usagePct}}% of the credit limit ({{limit}}).",
+    "crossSell": "{{confidencePct}}% of customers who buy {{product}} also buy {{associated}} (lift {{lift}}). Place them side by side or bundle them.",
+    "anomaly": {
+      "negativeStock": "{{product}} shows a negative stock ({{stock}}): sales were recorded without stock. Check the last delivery.",
+      "abnormalWaste": "Unusual losses on {{product}}: {{wasteLast7d}} units this week ({{costLast7d}}) against {{weeklyAverage}} per week usually.",
+      "negativeMargin": "{{product}} was sold below cost {{lines}} times this week (loss {{loss}}).",
+      "manyVoids": "{{user}} voided {{voids}} sales in the last 24 hours ({{amount}}).",
+      "batchMismatch": "{{product}}: stock ({{stock}}) differs from the batches total ({{batches}}). A stock count is recommended.",
+      "cashDiscrepancy": "Cash difference of {{difference}} when {{user}} closed session #{{sessionId}}.",
+      "lowMargin": "{{product}} has a {{marginPct}}% margin (minimum {{minMarginPct}}%). Average cost {{avgCost}}, price {{salePrice}}. Suggested price: {{suggestedPrice}}."
+    },
+    "promo": {
+      "nearExpiry": "{{product}} expires in {{daysLeft}} days with {{qty}} in stock: suggest −{{suggestedDiscountPct}}% (price {{suggestedPrice}}).",
+      "slowMoving": "{{product}} sells slowly ({{soldLast30d}} in 30 days for {{stock}} in stock): suggest −{{suggestedDiscountPct}}% (price {{suggestedPrice}})."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "tabs": { "store": "Store", "taxes": "Taxes", "categories": "Categories", "users": "Users", "audit": "Audit log" },
+    "store": {
+      "store_name": "Store name", "store_address": "Address", "store_phone": "Phone", "store_tax_number": "Tax registration no.",
+      "currency_code": "Currency (ISO code)", "currency_decimals": "Decimals", "receipt_footer": "Receipt footer",
+      "receipt_width_mm": "Receipt width (mm)", "prices_include_tax": "Sale prices include tax", "allow_negative_stock": "Allow selling without stock",
+      "expiry_alert_days": "Expiry alert (days)", "agent_velocity_days": "Sales speed window (days)", "agent_coverage_days": "Stock coverage target (days)",
+      "agent_slow_mover_days": "Slow mover above (days of cover)", "agent_waste_multiplier": "Abnormal loss factor",
+      "agent_max_voids_per_day": "Voids per cashier before alert", "agent_basket_days": "Basket analysis window (days)",
+      "agent_min_pair_count": "Minimum baskets per pair", "agent_min_margin_pct": "Minimum margin (%)",
+      "agent_cash_tolerance": "Tolerated cash difference", "agent_cash_tolerance_pct": "Tolerated cash difference (% of sales)"
+    },
+    "taxes": {
+      "hint": "Changing a rate never alters past sales: each sale keeps the rate applied at the time.", "new": "New tax", "edit": "Edit tax",
+      "code": "Code", "name": "Name", "type": "Type", "rate": "Rate", "appliesTo": "Applies to",
+      "types": { "PERCENT": "Percentage", "FIXED": "Fixed amount per unit" },
+      "scopes": { "SALES": "Sales", "PURCHASES": "Purchases", "BOTH": "Sales and purchases" }
+    },
+    "categories": { "new": "New category", "edit": "Edit category", "sortOrder": "Display order", "confirmDelete": "Delete {{name}}? Its products become uncategorised." },
+    "users": { "new": "New user", "edit": "Edit user", "role": "Role", "language": "Language", "lastLogin": "Last sign-in", "resetPassword": "New password (optional)" },
+    "audit": { "action": "Action", "entity": "Record", "changes": "Details" }
+  },
+  "errors": {
+    "server": "Something went wrong. Please try again.", "network": "Cannot reach the server. Is the API running?",
+    "unauthorized": "Please sign in.", "sessionExpired": "Your session has expired, please sign in again.", "forbidden": "You are not allowed to do this.",
+    "invalidCredentials": "Wrong username or password.", "invalidCurrentPassword": "The current password is incorrect.",
+    "validation": "Some fields are invalid.", "notFound": "Not found.", "duplicate": "This value already exists (SKU, barcode, code…).",
+    "inUse": "This item is in use and cannot be deleted.", "invalidReference": "A linked item does not exist.", "invalidValue": "Invalid value.",
+    "insufficientStock": "Not enough stock for this sale.", "insufficientBatchQuantity": "Not enough quantity in this batch.",
+    "invalidQuantity": "Invalid quantity.", "invalidMovementType": "Invalid movement type.", "productNotFound": "Product not found.",
+    "emptyCart": "The cart is empty.", "noPayment": "Add a payment.", "invalidCartLine": "A cart line is invalid or the product is inactive.",
+    "discountExceedsLine": "A discount is larger than the line amount.", "insufficientPayment": "The amount paid is less than the total.",
+    "overpaymentNonCash": "Only cash can exceed the amount due (to give change).", "creditRequiresCustomer": "Choose a registered customer to sell on credit.",
+    "creditLimitExceeded": "This sale exceeds the customer's credit limit.", "sessionNotOpen": "The till is not open.",
+    "sessionAlreadyOpen": "A session is already open on this till.", "saleNotVoidable": "This sale cannot be voided.",
+    "sessionClosedUseReturn": "This sale belongs to a closed session and can no longer be voided.", "voidReasonRequired": "A reason is required.",
+    "purchaseNotFound": "Purchase not found.", "purchaseNotDraft": "Only draft purchases can be changed.", "purchaseNotReceived": "The goods have not been received yet.",
+    "invalidAmount": "Invalid amount.", "customerNotFound": "Customer not found.", "cashCategoryNotFound": "Unknown category.",
+    "cashCategoryIsSystem": "This category is managed automatically.", "cashDirectionMismatch": "This category does not allow this direction.",
+    "invalidGranularity": "Invalid period.", "sequenceNotFound": "Document numbering is not configured.", "alertNotPromotion": "This alert is not a promotion.",
+    "alertNotApplicable": "This action does not apply to this alert.", "productWithoutSupplier": "Set a default supplier on the product first.",
+    "priceOverrideForbidden": "Only a manager can change a price at the till.", "passwordRequired": "A password is required.",
+    "cannotDisableSelf": "You cannot deactivate your own account."
+  }
+}

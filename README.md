@@ -8,11 +8,12 @@ Tout tourne en local : une base **MySQL** sur votre machine, une API Node.js et 
 
 ## 1. Prérequis
 
-| Logiciel | Version | Lien |
-|---|---|---|
-| Node.js | 20 ou plus (22 LTS conseillé) | https://nodejs.org |
-| MySQL Server | 8.0 ou plus | https://dev.mysql.com/downloads/mysql/ (Windows : « MySQL Installer ») |
-| Navigateur | Chrome, Edge ou Firefox récent | |
+
+| Logiciel     | Version                         | Lien                                                                     |
+| ------------ | ------------------------------- | ------------------------------------------------------------------------ |
+| Node.js      | 20 ou plus (22 LTS conseillé)  | https://nodejs.org                                                       |
+| MySQL Server | 8.0 ou plus                     | https://dev.mysql.com/downloads/mysql/ (Windows : « MySQL Installer ») |
+| Navigateur   | Chrome, Edge ou Firefox récent |                                                                          |
 
 Pendant l'installation de MySQL, **notez le mot de passe du compte `root`**. Il sert une seule fois, pour créer la base.
 
@@ -70,7 +71,7 @@ npm run dev
 
 Interface sur **http://localhost:5173** (rechargement à chaud), API sur le port 4000.
 
-### Première connexion
+### Première connexion 1
 
 - Identifiant : **admin**
 - Mot de passe : **Admin@123**
@@ -89,16 +90,17 @@ Dans **Paramètres → Taxes** : créez vos taxes (TVA / sales tax, taxes locale
 
 ## 5. Utilisation au quotidien
 
-| Écran | Ce qu'on y fait |
-|---|---|
-| **Point de vente** | Ouvrir la caisse (fond initial), scanner ou rechercher les produits, encaisser en espèces / carte / mobile / crédit client, paiements mixtes, calcul du rendu, impression du ticket. Raccourcis : **F2** recherche, **F9** encaisser. |
-| **Stock** | Niveaux, lots et dates de péremption, mouvements, pertes et casse, ajustements d'inventaire. |
-| **Achats** | Fournisseurs, bons de commande, réception (entrée en stock par lot), paiements fournisseurs. |
-| **Clients** | Comptes crédit (« khata »), plafond, historique, remboursements. |
-| **Caisse & dépenses** | Session en cours, dépenses (loyer, salaires, électricité…), clôture avec comptage et écart, rapport Z. |
-| **Rapports** | Bilan journalier, hebdomadaire, mensuel, annuel ; taxes collectées et déductibles ; top produits ; export **Excel** et **PDF**. |
-| **Tableau de bord** | Chiffre d'affaires, marges, taxe due, trésorerie, panier moyen, alertes, comparaison avec la période précédente. |
-| **Smart Agent** | Recommandations automatiques (voir ci-dessous). |
+
+| Écran                 | Ce qu'on y fait                                                                                                                                                                                                                        |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Point de vente**     | Ouvrir la caisse (fond initial), scanner ou rechercher les produits, encaisser en espèces / carte / mobile / crédit client, paiements mixtes, calcul du rendu, impression du ticket. Raccourcis :**F2** recherche, **F9** encaisser. |
+| **Stock**              | Niveaux, lots et dates de péremption, mouvements, pertes et casse, ajustements d'inventaire.                                                                                                                                          |
+| **Achats**             | Fournisseurs, bons de commande, réception (entrée en stock par lot), paiements fournisseurs.                                                                                                                                         |
+| **Clients**            | Comptes crédit (« khata »), plafond, historique, remboursements.                                                                                                                                                                    |
+| **Caisse & dépenses** | Session en cours, dépenses (loyer, salaires, électricité…), clôture avec comptage et écart, rapport Z.                                                                                                                           |
+| **Rapports**           | Bilan journalier, hebdomadaire, mensuel, annuel ; taxes collectées et déductibles ; top produits ; export**Excel** et **PDF**.                                                                                                       |
+| **Tableau de bord**    | Chiffre d'affaires, marges, taxe due, trésorerie, panier moyen, alertes, comparaison avec la période précédente.                                                                                                                   |
+| **Smart Agent**        | Recommandations automatiques (voir ci-dessous).                                                                                                                                                                                        |
 
 **Changer de langue :** boutons English / اردو / العربية en haut de l'écran, à tout moment. Le panier en cours, les formulaires et la page ouverte sont conservés. Chaque utilisateur retrouve sa langue à la connexion, et un ticket peut être réimprimé dans une autre langue depuis **Ventes**.
 
@@ -137,13 +139,14 @@ Planifiez une sauvegarde quotidienne (Planificateur de tâches Windows ou cron) 
 
 ## 8. Problèmes fréquents
 
-| Symptôme | Solution |
-|---|---|
-| `Access denied for user 'root'` pendant `db:init` | Vérifiez `DB_ROOT_PASSWORD`. Sous Linux, root utilise parfois `auth_socket` : `sudo mysql -e "ALTER USER root@localhost IDENTIFIED WITH caching_sha2_password BY 'motdepasse'"`. |
-| `You do not have the SUPER privilege… log_bin_trust_function_creators` | Lancez `db:init` avec le compte root, ou exécutez `SET GLOBAL log_bin_trust_function_creators = 1;` une fois. |
-| `ECONNREFUSED 127.0.0.1:3306` | Le service MySQL n'est pas démarré (Windows : Services → MySQL80 → Démarrer ; Linux : `sudo service mysql start`). |
-| Port 4000 déjà utilisé | Changez `PORT` dans `backend/.env`. |
-| Page blanche après `npm start` | Lancez `npm run build` d'abord. |
+
+| Symptôme                                                               | Solution                                                                                                                                                                         |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Access denied for user 'root'` pendant `db:init`                       | Vérifiez`DB_ROOT_PASSWORD`. Sous Linux, root utilise parfois `auth_socket` : `sudo mysql -e "ALTER USER root@localhost IDENTIFIED WITH caching_sha2_password BY 'motdepasse'"`. |
+| `You do not have the SUPER privilege… log_bin_trust_function_creators` | Lancez`db:init` avec le compte root, ou exécutez `SET GLOBAL log_bin_trust_function_creators = 1;` une fois.                                                                    |
+| `ECONNREFUSED 127.0.0.1:3306`                                           | Le service MySQL n'est pas démarré (Windows : Services → MySQL80 → Démarrer ; Linux :`sudo service mysql start`).                                                           |
+| Port 4000 déjà utilisé                                               | Changez`PORT` dans `backend/.env`.                                                                                                                                               |
+| Page blanche après`npm start`                                          | Lancez`npm run build` d'abord.                                                                                                                                                   |
 
 ---
 

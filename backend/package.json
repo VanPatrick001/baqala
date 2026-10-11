@@ -1,42 +1,36 @@
-{
-  "name": "@baqala/backend",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "db:init": "tsx scripts/db-init.ts",
-    "db:demo": "tsx scripts/db-init.ts --demo",
-    "db:reset": "tsx scripts/db-init.ts --force",
-    "db:demo:reset": "tsx scripts/db-init.ts --demo --force",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^18.0.5",
-    "exceljs": "^4.4.0",
-    "express": "^4.22.3",
-    "helmet": "^8.3.0",
-    "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.12.1",
-    "mysql2": "^3.24.5",
-    "node-cron": "^4.6.0",
-    "zod": "^4.6.5"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^4.17.25",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/morgan": "^1.9.10",
-    "@types/node": "^26.6.4",
-    "@types/supertest": "^7.2.1",
-    "supertest": "^7.3.1",
-    "tsx": "^4.23.15",
-    "typescript": "^5.9.3",
-    "vitest": "^5.0.3"
-  }
-}
+name: Backend CI
+
+on:
+    push:
+    branches: [main]
+pull_request:
+    branches: [main]
+
+jobs:
+    backend:
+    runs - on: ubuntu - latest
+
+steps:
+    -uses: actions / checkout @v4
+
+    -
+    uses: actions / setup - node @v4
+with:
+    node - version: 22. x
+cache: 'npm'
+
+-
+name: Installer les dépendances
+run: npm ci
+
+    -
+    name: Vérifier les types
+run: npm run typecheck - w @baqala / backend
+
+    -
+    name: Build
+run: npm run build - w @baqala / backend
+
+    -
+    name: Tests
+run: npm test - w @baqala / backend

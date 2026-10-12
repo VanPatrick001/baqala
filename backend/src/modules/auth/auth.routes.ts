@@ -4,14 +4,32 @@ import { z } from 'zod';
 import { execute, queryOne } from '../../core/db.js';
 import { ah, AppError } from '../../core/errors.js';
 import { requireAuth, signToken, userId, type AuthUser } from '../../core/auth.js';
+import { effectivePermissions, parseModules } from '../../core/modules.js';
 import { lang } from '../../core/http.js';
 
 export const authRouter = Router();
 
+// Anti-force brute : l'app peut être joignable à distance, on limite les essais de mot de passe.
+const MAX_FAILURES = 8;
+const LOCK_MS = 15 * 60 * 1000;
+const failures = new Map<string, { count: number; until: number }>();
+const failureKey = (ip: string | undefined, username: string) => `${ip ?? '?'}|${username.toLowerCase()}`;
+function assertNotLocked(key: string) {
+  const f = failures.get(key);
+  if (f && f.until > Date.now()) throw new AppError(429, 'errors.tooManyAttempts');
+  if (f && f.until && f.until <= Date.now()) failures.delete(key);
+}
+function recordFailure(key: string) {
+  const f = failures.get(key) ?? { count: 0, until: 0 };
+  f.count += 1;
+  if (f.count >= MAX_FAILURES) { f.until = Date.now() + LOCK_MS; f.count = 0; }
+  failures.set(key, f);
+}
+
 async function loadUser(where: string, param: unknown) {
   return queryOne(
     `SELECT u.id, u.username, u.full_name, u.email, u.password_hash, u.preferred_language,
-            u.must_change_password, u.is_active, r.code AS role, r.permissions
+            u.must_change_password, u.is_active, u.modules, r.code AS role, r.permissions
        FROM users u JOIN roles r ON r.id = u.role_id WHERE ${where}`,
     [param],
   );
@@ -24,7 +42,8 @@ function publicUser(u: any) {
     fullName: u.full_name,
     email: u.email,
     role: u.role,
-    permissions: u.permissions,
+    permissions: effectivePermissions(u.permissions, parseModules(u.modules)),
+    modules: parseModules(u.modules),
     preferredLanguage: u.preferred_language,
     mustChangePassword: !!u.must_change_password,
   };
@@ -34,17 +53,21 @@ authRouter.post(
   '/login',
   ah(async (req, res) => {
     const { username, password } = z.object({ username: z.string().min(1), password: z.string().min(1) }).parse(req.body);
+    const key = failureKey(req.ip, username);
+    assertNotLocked(key);
     const u = await loadUser('u.username = ?', username);
     if (!u || !u.is_active || !(await bcrypt.compare(password, u.password_hash))) {
+      recordFailure(key);
       throw new AppError(401, 'errors.invalidCredentials');
     }
+    failures.delete(key);
     await execute('UPDATE users SET last_login_at = NOW() WHERE id = ?', [u.id]);
     await execute(
       `INSERT INTO audit_logs (user_id, action, entity_type, entity_id, ip_address, user_agent)
        VALUES (?, 'LOGIN', 'user', ?, ?, ?)`,
       [u.id, u.id, req.ip, String(req.headers['user-agent'] ?? '').slice(0, 255)],
     );
-    const authUser: AuthUser = { id: u.id, username: u.username, role: u.role, permissions: u.permissions };
+    const authUser: AuthUser = { id: u.id, username: u.username, role: u.role, permissions: effectivePermissions(u.permissions, parseModules(u.modules)) };
     res.json({ token: signToken(authUser), user: publicUser(u) });
   }),
 );

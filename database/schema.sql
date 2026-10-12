@@ -68,10 +68,12 @@ CREATE TABLE users (
     phone               VARCHAR(30)  NULL,
     password_hash       VARCHAR(255) NOT NULL,
     pin_code_hash       VARCHAR(255) NULL COMMENT 'PIN rapide pour la caisse',
+    modules             JSON         NULL COMMENT 'Modules autorisés (NULL = tous ceux du rôle)',
     preferred_language  CHAR(2)      NOT NULL DEFAULT 'en',
     must_change_password TINYINT(1)  NOT NULL DEFAULT 0,
     is_active           TINYINT(1)   NOT NULL DEFAULT 1,
     last_login_at       DATETIME     NULL,
+    deleted_at          DATETIME     NULL COMMENT 'Utilisateur supprimé (conservé pour l''historique des ventes)',
     created_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
@@ -1430,9 +1432,16 @@ BEGIN
     IF v_status IS NULL OR v_status <> 'COMPLETED' THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'errors.saleNotVoidable';
     END IF;
+    -- Caisse d'origine déjà clôturée : le remboursement sort de la caisse ouverte (celle de la personne qui annule en priorité)
     IF NOT EXISTS (SELECT 1 FROM cash_sessions WHERE id = v_session AND status = 'OPEN') THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'errors.sessionClosedUseReturn';
+        SET v_session = NULL;
+        SELECT id INTO v_session FROM cash_sessions
+         WHERE status = 'OPEN' ORDER BY (opened_by = p_user_id) DESC, id DESC LIMIT 1;
+        IF v_session IS NULL THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'errors.openSessionToRefund';
+        END IF;
     END IF;
+    SET v_done = 0;
 
     OPEN cur_lines;
     lines_loop: LOOP
@@ -1616,6 +1625,26 @@ BEGIN
      GROUP BY si.product_id
      ORDER BY revenue_net DESC
      LIMIT p_limit;
+END$$
+
+-- Bénéfice par produit et par mois : quantités, CA HT, coût réel (FEFO) et bénéfice des ventes non annulées.
+-- Les prix d'achat et de vente actuels de la fiche produit sont joints pour comparaison.
+CREATE PROCEDURE sp_product_profit(IN p_from DATE, IN p_to DATE)
+BEGIN
+    SELECT si.product_id,
+           DATE_FORMAT(s.created_at, '%Y-%m') AS month,
+           MAX(si.product_name) AS product_name,
+           p.sku, p.purchase_price, p.avg_cost, p.sale_price,
+           SUM(si.quantity) AS qty_sold,
+           ROUND(SUM(si.net_amount), 2) AS revenue_net,
+           ROUND(SUM(si.quantity * si.unit_cost), 2) AS cost,
+           ROUND(SUM(si.net_amount - si.quantity * si.unit_cost), 2) AS profit
+      FROM sale_items si
+      JOIN sales s ON s.id = si.sale_id
+      JOIN products p ON p.id = si.product_id
+     WHERE s.status = 'COMPLETED' AND s.created_at >= p_from AND s.created_at < p_to + INTERVAL 1 DAY
+     GROUP BY si.product_id, month, p.sku, p.purchase_price, p.avg_cost, p.sale_price
+     ORDER BY month, profit DESC;
 END$$
 
 -- -----------------------------------------------------------------------------
@@ -2072,10 +2101,14 @@ INSERT INTO languages (code, name, native_name, direction, is_default, sort_orde
     ('ar', 'Arabic',  'العربية', 'rtl', 0, 3);
 
 INSERT INTO roles (code, name, permissions) VALUES
+    -- Administrateur : tout, y compris utilisateurs, rôles et droits
     ('ADMIN',   'Administrator', JSON_ARRAY('*')),
-    ('MANAGER', 'Manager',       JSON_ARRAY('dashboard.view','products.*','stock.*','purchases.*','suppliers.*',
-                                            'customers.*','sales.*','cash.*','reports.*','agent.*','taxes.view')),
-    ('CASHIER', 'Cashier',       JSON_ARRAY('pos.use','sales.view_own','customers.view','customers.create',
+    -- Manager : toute l'activité et la comptabilité ; ajoute et gère les vendeurs
+    ('MANAGER', 'Manager',       JSON_ARRAY('dashboard.view','pos.use','products.*','stock.*','purchases.*','suppliers.*',
+                                            'customers.*','sales.*','cash.*','reports.*','agent.*','taxes.*',
+                                            'settings.manage','users.manage_sellers','audit.view')),
+    -- Vendeur : caisse ; annule ou corrige ses propres ventes de moins de 24 h ; aucune écriture comptable
+    ('CASHIER', 'Seller',        JSON_ARRAY('pos.use','sales.view_own','sales.void_own','customers.view','customers.create',
                                             'cash.session','products.view'));
 
 -- admin / Admin@123 (bcrypt, coût 10) - changement imposé à la première connexion

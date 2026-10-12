@@ -10,7 +10,7 @@ import { requireAuth } from './core/auth.js';
 import { errorHandler } from './core/errors.js';
 import { pool } from './core/db.js';
 import { authRouter } from './modules/auth/auth.routes.js';
-import { usersRouter } from './modules/users/users.routes.js';
+import { rolesRouter, usersRouter } from './modules/users/users.routes.js';
 import { metaRouter, settingsRouter } from './modules/settings/settings.routes.js';
 import { categoriesRouter } from './modules/catalog/categories.routes.js';
 import { productsRouter } from './modules/catalog/products.routes.js';
@@ -34,9 +34,11 @@ export function createApp() {
   if (env.nodeEnv !== 'test') app.use(morgan('dev'));
 
   app.get('/api/health', async (_req, res) => {
+    // Ouvert à toutes les origines : les applications PC et Android testent l'adresse du serveur avant de s'y connecter
+    res.set('Access-Control-Allow-Origin', '*');
     try {
       await pool.query('SELECT 1');
-      res.json({ status: 'ok', db: 'ok' });
+      res.json({ status: 'ok', db: 'ok', app: 'baqala' });
     } catch {
       res.status(503).json({ status: 'degraded', db: 'down' });
     }
@@ -49,6 +51,7 @@ export function createApp() {
   api.use('/meta', metaRouter);
   api.use('/settings', settingsRouter);
   api.use('/users', usersRouter);
+  api.use('/roles', rolesRouter);
   api.use('/categories', categoriesRouter);
   api.use('/products', productsRouter);
   api.use('/taxes', taxesRouter);

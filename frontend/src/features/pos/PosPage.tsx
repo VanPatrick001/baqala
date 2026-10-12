@@ -147,7 +147,7 @@ function Till({ session }: { session: CashSession }) {
   };
 
   return (
-    <div className="grid h-[calc(100vh-7rem)] gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
+    <div className="grid h-[calc(100vh-7rem)] grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
       {/* Catalogue */}
       <section className="flex min-h-0 min-w-0 flex-col">
         <form onSubmit={onScan} className="mb-3 flex gap-2">
@@ -164,9 +164,9 @@ function Till({ session }: { session: CashSession }) {
           <span className="hidden items-center text-xs text-slate-400 md:flex">F2 · F9</span>
         </form>
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-          <button className={clsx('btn whitespace-nowrap py-1', !categoryId ? 'bg-brand-700 text-white' : 'btn-secondary')} onClick={() => setCategoryId(null)}>{t('common.all')}</button>
+          <button className={clsx('btn shrink-0 whitespace-nowrap py-1', !categoryId ? 'bg-brand-700 text-white' : 'btn-secondary')} onClick={() => setCategoryId(null)}>{t('common.all')}</button>
           {categories?.filter((c) => c.isActive).map((c) => (
-            <button key={c.id} className={clsx('btn whitespace-nowrap py-1', categoryId === c.id ? 'bg-brand-700 text-white' : 'btn-secondary')} onClick={() => setCategoryId(c.id)}>
+            <button key={c.id} className={clsx('btn shrink-0 whitespace-nowrap py-1', categoryId === c.id ? 'bg-brand-700 text-white' : 'btn-secondary')} onClick={() => setCategoryId(c.id)}>
               {f.name(c.name, c.translations)}
             </button>
           ))}

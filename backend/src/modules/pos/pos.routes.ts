@@ -40,7 +40,7 @@ export async function loadReceipt(saleId: number) {
     `SELECT s.id, s.receipt_no AS receiptNo, s.status, s.subtotal, s.discount_total AS discountTotal, s.tax_total AS taxTotal,
             s.total, s.cost_total AS costTotal, s.paid_total AS paidTotal, s.change_due AS changeDue,
             s.language_code AS language, s.created_at AS createdAt, s.session_id AS sessionId,
-            s.void_reason AS voidReason, s.voided_at AS voidedAt,
+            s.void_reason AS voidReason, s.voided_at AS voidedAt, TIMESTAMPDIFF(MINUTE, s.created_at, NOW()) AS ageMinutes,
             u.full_name AS cashier, s.user_id AS userId, c.id AS customerId, c.full_name AS customerName, c.balance AS customerBalance
        FROM sales s JOIN users u ON u.id = s.user_id LEFT JOIN customers c ON c.id = s.customer_id
       WHERE s.id = ?`,
@@ -158,10 +158,20 @@ salesRouter.get(
 
 salesRouter.post(
   '/:id/void',
-  can('sales.void'),
+  can('sales.void', 'sales.void_own'),
   ah(async (req, res) => {
     const saleId = id.parse(req.params.id);
     const { reason } = z.object({ reason: z.string().trim().min(3).max(255) }).parse(req.body);
+    // Vendeur : uniquement ses propres ventes, et seulement pendant 24 h. Manager et administrateur : sans limite.
+    if (!hasPermission(req.user, 'sales.void')) {
+      const s = await queryOne<{ user_id: number; recent: number }>(
+        'SELECT user_id, created_at >= NOW() - INTERVAL 24 HOUR AS recent FROM sales WHERE id = ?',
+        [saleId],
+      );
+      if (!s) throw new AppError(404, 'errors.notFound');
+      if (s.user_id !== userId(req)) throw new AppError(403, 'errors.notOwnSale');
+      if (!Number(s.recent)) throw new AppError(403, 'errors.saleTooOld');
+    }
     await withConnection(userId(req), (conn) => callProcedure(conn, 'sp_void_sale', [saleId, userId(req), reason]));
     res.json(await loadReceipt(saleId));
   }),

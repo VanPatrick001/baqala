@@ -6,6 +6,8 @@ import { api, errorKey } from '../../api/client';
 import { useAuth, type User } from '../../stores/auth';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { Spinner } from '../../components/ui';
+import { homePath } from '../../lib/modules';
+import { nativeApp } from '../../lib/native';
 
 export function LoginPage() {
   const { t, i18n } = useTranslation();
@@ -27,7 +29,7 @@ export function LoginPage() {
       qc.clear();
       // On restaure la langue préférée de l'utilisateur
       if (data.user.preferredLanguage && data.user.preferredLanguage !== i18n.language) await i18n.changeLanguage(data.user.preferredLanguage);
-      navigate(data.user.permissions.includes('pos.use') && data.user.role === 'CASHIER' ? '/pos' : '/');
+      navigate(homePath(data.user) ?? '/');
     } catch (err) {
       setError(errorKey(err));
     } finally {
@@ -52,6 +54,9 @@ export function LoginPage() {
         <button className="btn-primary w-full" disabled={busy || !username || !password}>{busy ? <Spinner className="text-white" /> : t('auth.login')}</button>
         <p className="mt-4 text-center text-xs text-slate-400">{t('auth.defaultHint')}</p>
       </form>
+      {nativeApp() && (
+        <button type="button" className="btn-ghost mt-4 text-xs text-slate-500" onClick={() => nativeApp()!.changeServer()}>{t('app.changeServer')}</button>
+      )}
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { useCart } from '../../stores/cart';
 import { useFormat } from '../../lib/format';
 import { computeChange, round2, type PaymentMethod } from '../../lib/cart';
 import { Modal, NumberInput } from '../../components/ui';
+import { Keypad } from '../../components/Keypad';
+import { useTouchScreen } from '../../lib/touch';
 
 const METHODS: { method: PaymentMethod; icon: typeof Banknote }[] = [
   { method: 'CASH', icon: Banknote },
@@ -22,6 +24,7 @@ export function PaymentModal({
 }: { total: number; sessionId: number; customer: Customer | null; language: string; onClose: () => void; onPaid: (r: Receipt) => void }) {
   const { t } = useTranslation();
   const f = useFormat();
+  const touch = useTouchScreen();
   const lines = useCart((s) => s.lines);
   const [method, setMethod] = useState<PaymentMethod>('CASH');
   const [amount, setAmount] = useState(total);
@@ -105,12 +108,21 @@ export function PaymentModal({
       )}
 
       <div className="flex gap-2">
-        <NumberInput value={amount} onChange={setAmount} min={0} className="text-lg" autoFocus onKeyDown={(e) => { if (e.key !== 'Enter') return; if (!tenders.length && pendingValid) checkout.mutate(pending); else addTender(); }} />
+        <NumberInput value={amount} onChange={setAmount} min={0} className="text-lg" autoFocus={!touch} onKeyDown={(e) => { if (e.key !== 'Enter') return; if (!tenders.length && pendingValid) checkout.mutate(pending); else addTender(); }} />
         {(method === 'CARD' || method === 'MOBILE') && (
           <input className="input w-40" placeholder={t('pos.reference')} value={reference} onChange={(e) => setReference(e.target.value)} />
         )}
         <button className="btn-secondary whitespace-nowrap" onClick={() => addTender()}>{t('pos.addPayment')}</button>
       </div>
+
+      {touch && (
+        <Keypad
+          value={amount}
+          onChange={setAmount}
+          enterLabel={tenders.length ? t('pos.addPayment') : t('pos.confirmPayment')}
+          onEnter={() => { if (!tenders.length && pendingValid) checkout.mutate(pending); else addTender(); }}
+        />
+      )}
 
       {method === 'CASH' && remaining > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">

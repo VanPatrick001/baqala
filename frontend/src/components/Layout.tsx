@@ -4,31 +4,25 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
-  BarChart3, Boxes, BrainCircuit, Wallet, LayoutDashboard, LogOut, Menu, Package, Receipt, Settings, ShoppingCart, Truck, Users, X,
+  BarChart3, Boxes, Server, BrainCircuit, Wallet, LayoutDashboard, LogOut, Menu, Package, Receipt, Settings, ShoppingCart, Truck, Users, X,
 } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { useAuth, useCan, can } from '../stores/auth';
+import { useAuth, useCan, type User } from '../stores/auth';
+import { MODULE_PAGES, canOpen, type ModuleKey } from '../lib/modules';
+import { nativeApp } from '../lib/native';
 import { get } from '../api/hooks';
 import { ChangePasswordModal } from '../features/auth/ChangePasswordModal';
 
-const NAV = [
-  { to: '/', key: 'nav.dashboard', icon: LayoutDashboard, perm: ['dashboard.view', 'reports.view'] },
-  { to: '/pos', key: 'nav.pos', icon: ShoppingCart, perm: ['pos.use'] },
-  { to: '/sales', key: 'nav.sales', icon: Receipt, perm: ['sales.view', 'sales.view_own'] },
-  { to: '/products', key: 'nav.products', icon: Package, perm: ['products.view'] },
-  { to: '/inventory', key: 'nav.inventory', icon: Boxes, perm: ['stock.view'] },
-  { to: '/purchases', key: 'nav.purchases', icon: Truck, perm: ['purchases.view'] },
-  { to: '/customers', key: 'nav.customers', icon: Users, perm: ['customers.view'] },
-  { to: '/cash', key: 'nav.cash', icon: Wallet, perm: ['cash.view', 'cash.session'] },
-  { to: '/reports', key: 'nav.reports', icon: BarChart3, perm: ['reports.view'] },
-  { to: '/agent', key: 'nav.agent', icon: BrainCircuit, perm: ['agent.view'], badge: true },
-  { to: '/settings', key: 'nav.settings', icon: Settings, perm: ['settings.manage', 'taxes.view', 'users.manage'] },
-];
+const ICONS: Record<ModuleKey, typeof LayoutDashboard> = {
+  dashboard: LayoutDashboard, pos: ShoppingCart, sales: Receipt, products: Package, inventory: Boxes, purchases: Truck,
+  customers: Users, cash: Wallet, reports: BarChart3, agent: BrainCircuit, settings: Settings,
+};
 
 export function Layout() {
   const { t } = useTranslation();
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
+  const setUser = useAuth((s) => s.setUser);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [pwd, setPwd] = useState(false);
@@ -41,7 +35,17 @@ export function Layout() {
   });
   const critical = agent?.counts.filter((c) => c.severity !== 'INFO').reduce((s, c) => s + c.count, 0) ?? 0;
 
-  const items = NAV.filter((n) => can(user, ...n.perm));
+  // Droits et modules relus régulièrement : un changement fait par l'administrateur s'applique sans se reconnecter
+  useQuery({
+    queryKey: ['me'],
+    queryFn: async () => { const me = await get<User>('/auth/me'); setUser(me); return me; },
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+  });
+
+  const items = MODULE_PAGES.filter((p) => canOpen(user, p.module)).map((p) => ({
+    to: p.to, key: `nav.${p.module}`, icon: ICONS[p.module], badge: p.module === 'agent',
+  }));
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -77,8 +81,11 @@ export function Layout() {
         <div className="border-t border-slate-200 p-3 text-sm">
           <div className="font-semibold text-slate-800">{user?.fullName}</div>
           <div className="text-xs text-slate-500">{t(`roles.${user?.role}`)}</div>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-wrap gap-2">
             <button className="btn-ghost px-2 py-1 text-xs" onClick={() => setPwd(true)}>{t('auth.changePassword')}</button>
+            {nativeApp() && (
+              <button className="btn-ghost px-2 py-1 text-xs" onClick={() => nativeApp()!.changeServer()}><Server size={14} /> {t('app.changeServer')}</button>
+            )}
             <button className="btn-ghost px-2 py-1 text-xs" onClick={() => { logout(); navigate('/login'); }}>
               <LogOut size={14} /> {t('auth.logout')}
             </button>

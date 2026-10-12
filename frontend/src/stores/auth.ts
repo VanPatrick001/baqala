@@ -7,6 +7,8 @@ export interface User {
   fullName: string;
   role: string;
   permissions: string[];
+  /** Modules autorisés ; null = tous ceux du rôle */
+  modules?: string[] | null;
   preferredLanguage: 'en' | 'ur' | 'ar';
   mustChangePassword: boolean;
 }

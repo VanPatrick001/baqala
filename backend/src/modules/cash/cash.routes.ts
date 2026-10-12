@@ -107,7 +107,7 @@ cashRouter.post(
 
 cashRouter.get(
   '/movements',
-  can('cash.view', 'cash.session'),
+  can('cash.view'),
   ah(async (req, res) => {
     const q = pageQuery
       .extend({ from: dateStr.optional(), to: dateStr.optional(), sessionId: z.coerce.number().int().optional(), direction: z.enum(['IN', 'OUT']).optional() })
@@ -140,7 +140,8 @@ cashRouter.get(
 /** Dépense ou entrée manuelle (loyer, salaires, électricité, apport...). */
 cashRouter.post(
   '/movements',
-  can('cash.manage', 'cash.session'),
+  // Comptabilité : manager et administrateur uniquement (un vendeur ne peut rien y saisir)
+  can('cash.manage'),
   ah(async (req, res) => {
     const b = z
       .object({

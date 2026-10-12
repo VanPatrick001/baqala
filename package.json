@@ -15,6 +15,7 @@
     "db:demo": "npm run db:demo -w backend",
     "db:reset": "npm run db:reset -w backend",
     "db:demo:reset": "npm run db:demo:reset -w backend",
+    "db:migrate": "npm run db:migrate -w backend",
     "test": "npm run test -w backend"
   },
   "devDependencies": {

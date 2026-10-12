@@ -9,14 +9,17 @@ import { useCan } from '../../stores/auth';
 import { toast } from '../../stores/toast';
 import { useFormat } from '../../lib/format';
 import { Badge, Empty, Field, Loading, Modal, NumberInput, PageHeader, StatCard, Tabs } from '../../components/ui';
+import { printDocument } from '../../lib/native';
 
 export function CashPage() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<'session' | 'movements' | 'history'>('session');
+  const canBooks = useCan('cash.view');
   return (
     <div>
       <PageHeader title={t('cash.title')} />
-      <Tabs value={tab} onChange={setTab} tabs={[{ value: 'session', label: t('cash.currentSession') }, { value: 'movements', label: t('cash.movements') }, { value: 'history', label: t('cash.history') }]} />
+      {/* Journal et historique = comptabilité : manager et administrateur uniquement */}
+      {canBooks && <Tabs value={tab} onChange={setTab} tabs={[{ value: 'session', label: t('cash.currentSession') }, { value: 'movements', label: t('cash.movements') }, { value: 'history', label: t('cash.history') }]} />}
       {tab === 'session' && <CurrentSession />}
       {tab === 'movements' && <Movements />}
       {tab === 'history' && <History />}
@@ -35,6 +38,7 @@ function CurrentSession() {
   const [notes, setNotes] = useState('');
   const [zReport, setZReport] = useState<CashSession | null>(null);
   const [movement, setMovement] = useState<'IN' | 'OUT' | null>(null);
+  const canManage = useCan('cash.manage');
   const refresh = () => ['session', 'cash-movements', 'cash-history', 'dashboard'].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
 
   const open = useMutation({
@@ -71,8 +75,10 @@ function CurrentSession() {
         <StatCard label={t('kpi.taxCollected')} value={f.money(s.sales.taxTotal)} />
       </div>
       <div className="mb-4 flex flex-wrap gap-2">
-        <button className="btn-secondary" onClick={() => setMovement('IN')}><ArrowDownLeft size={16} /> {t('cash.cashIn')}</button>
-        <button className="btn-secondary" onClick={() => setMovement('OUT')}><ArrowUpRight size={16} /> {t('cash.expense')}</button>
+        {canManage && <>
+          <button className="btn-secondary" onClick={() => setMovement('IN')}><ArrowDownLeft size={16} /> {t('cash.cashIn')}</button>
+          <button className="btn-secondary" onClick={() => setMovement('OUT')}><ArrowUpRight size={16} /> {t('cash.expense')}</button>
+        </>}
         <button className="btn-danger" onClick={() => { setCounted(s.currentExpectedCash); setClosing(true); }}><Lock size={16} /> {t('cash.closeSession')}</button>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
@@ -112,7 +118,7 @@ function ZReport({ report, onClose }: { report: CashSession; onClose: () => void
   const { t } = useTranslation();
   const f = useFormat();
   return (
-    <Modal open onClose={onClose} title={t('cash.zReport')} size="sm" footer={<button className="btn-primary" onClick={() => window.print()}>{t('common.print')}</button>}>
+    <Modal open onClose={onClose} title={t('cash.zReport')} size="sm" footer={<button className="btn-primary" onClick={() => void printDocument('page')}>{t('common.print')}</button>}>
       <div className="print-area space-y-1 text-sm">
         <div className="text-center font-bold">{t('cash.zReport')} #<span className="num">{report.id}</span></div>
         <div className="text-center text-xs num">{report.openedAt} → {report.closedAt}</div>

@@ -78,7 +78,7 @@ export function Empty({ text }: { text?: string }) {
 
 export function Tabs<T extends string>({ value, onChange, tabs }: { value: T; onChange: (v: T) => void; tabs: { value: T; label: string; count?: number }[] }) {
   return (
-    <div className="mb-4 flex gap-1 overflow-x-auto border-b border-slate-200">
+    <div className="mb-4 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-slate-200">
       {tabs.map((tab) => (
         <button
           key={tab.value}

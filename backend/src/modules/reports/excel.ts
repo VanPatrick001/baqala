@@ -25,7 +25,7 @@ export async function buildWorkbook(from: string, to: string, granularity: svc.G
   };
   const money = '#,##0.00';
 
-  const [summary, period, taxes, top, stock] = await Promise.all([
+  const [summary, period, taxes, top, stock, profit] = await Promise.all([
     svc.financialSummary(from, to),
     svc.periodReport(granularity, from, to),
     svc.taxReport(from, to),
@@ -36,6 +36,7 @@ export async function buildWorkbook(from: string, to: string, granularity: svc.G
         ORDER BY v.name`,
       [lang],
     ),
+    svc.productProfit(from, to),
   ]);
 
   const ws1 = sheet('summary');
@@ -66,6 +67,21 @@ export async function buildWorkbook(from: string, to: string, granularity: svc.G
   header(ws5, ['sku', 'name', 'stock_qty', 'min_stock', 'stock_value', 'next_expiry', 'status'], [16, 36]);
   for (const r of stock) ws5.addRow(r);
   ws5.getColumn('stock_value').numFmt = money;
+
+  const ws6 = sheet('productProfit');
+  const profitKeys = ['month', 'sku', 'product', 'purchase_price', 'sale_price', 'qty_sold', 'avg_purchase_cost', 'avg_sale_price',
+    'revenue_net', 'cost', 'profit', 'margin_pct'];
+  header(ws6, profitKeys, [10, 16, 36]);
+  for (const r of profit) ws6.addRow({ ...r, product: r.translations?.[lang] ?? r.product_name });
+  profitKeys.slice(3).filter((k) => k !== 'qty_sold' && k !== 'margin_pct').forEach((k) => (ws6.getColumn(k).numFmt = money));
+  // Total par mois
+  const byMonth = new Map<string, number>();
+  for (const r of profit) byMonth.set(r.month, (byMonth.get(r.month) ?? 0) + r.profit);
+  ws6.addRow({});
+  for (const [m, p] of byMonth) {
+    const row = ws6.addRow({ month: m, product: label('totalMonth', lang), profit: Math.round(p * 100) / 100 });
+    row.font = { bold: true };
+  }
 
   return wb;
 }

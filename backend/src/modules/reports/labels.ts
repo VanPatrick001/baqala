@@ -44,6 +44,16 @@ const L: Record<string, Record<Lang, string>> = {
   stock_value: { en: 'Stock value', ur: 'اسٹاک کی قدر', ar: 'قيمة المخزون' },
   next_expiry: { en: 'Next expiry', ur: 'قریب ترین میعاد', ar: 'أقرب انتهاء' },
   status: { en: 'Status', ur: 'حالت', ar: 'الحالة' },
+  productProfit: { en: 'Profit by product', ur: 'فی پروڈکٹ منافع', ar: 'الربح حسب المنتج' },
+  month: { en: 'Month', ur: 'مہینہ', ar: 'الشهر' },
+  purchase_price: { en: 'Purchase price', ur: 'قیمتِ خرید', ar: 'سعر الشراء' },
+  sale_price: { en: 'Sale price', ur: 'قیمتِ فروخت', ar: 'سعر البيع' },
+  avg_purchase_cost: { en: 'Actual unit cost', ur: 'اصل فی یونٹ لاگت', ar: 'التكلفة الفعلية للوحدة' },
+  avg_sale_price: { en: 'Actual unit price (excl. tax)', ur: 'اصل فی یونٹ قیمت (ٹیکس کے بغیر)', ar: 'سعر الوحدة الفعلي (بدون ضريبة)' },
+  cost: { en: 'Purchase cost', ur: 'خرید کی لاگت', ar: 'تكلفة الشراء' },
+  profit: { en: 'Profit', ur: 'منافع', ar: 'الربح' },
+  margin_pct: { en: 'Margin %', ur: 'منافع %', ar: 'الهامش %' },
+  totalMonth: { en: 'Total for the month', ur: 'مہینے کا کل', ar: 'إجمالي الشهر' },
 };
 
 export const label = (key: string, lang: Lang) => L[key]?.[lang] ?? L[key]?.en ?? key;

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved">ڈاؤن لوڈز میں محفوظ: %1$s</string>
+    <string name="save_failed">فائل محفوظ نہیں ہو سکی</string>
+    <string name="print_job">BAQALA دستاویز</string>
+    <string name="press_back_again">باہر نکلنے کے لیے دوبارہ واپس دبائیں</string>
+</resources>

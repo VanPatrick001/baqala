@@ -1,0 +1,60 @@
+{
+  "name": "baqala-desktop",
+  "productName": "BAQALA",
+  "version": "1.0.0",
+  "description": "BAQALA - application PC (caisse, stock, taxes, trésorerie)",
+  "author": "BAQALA",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "prepare-assets": "node scripts/prepare-assets.js",
+    "start": "npm run prepare-assets && electron .",
+    "dist:win": "npm run prepare-assets && electron-builder --win nsis --x64",
+    "dist:linux": "npm run prepare-assets && electron-builder --linux AppImage"
+  },
+  "build": {
+    "appId": "com.baqala.desktop",
+    "productName": "BAQALA",
+    "copyright": "BAQALA",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "build/icon.png",
+      "build/icon.ico",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": "nsis",
+      "artifactName": "BAQALA-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "BAQALA",
+      "multiLanguageInstaller": true,
+      "installerLanguages": [
+        "fr_FR",
+        "en_US",
+        "ar_SA"
+      ]
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "category": "Office",
+      "artifactName": "BAQALA-${version}.${ext}"
+    },
+    "publish": null
+  },
+  "devDependencies": {
+    "electron": "^38.8.6",
+    "electron-builder": "^26.15.3"
+  }
+}

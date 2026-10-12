@@ -13,33 +13,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import mysql from 'mysql2/promise';
+import { splitSql } from './sql.js';
+import { markAllMigrationsApplied } from './db-migrate.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../database');
 const demo = process.argv.includes('--demo');
 const force = process.argv.includes('--force');
-
-/** Découpe un script SQL en tenant compte des blocs DELIMITER $$ (format du client mysql). */
-function splitSql(sql: string): string[] {
-  const statements: string[] = [];
-  let delimiter = ';';
-  let buffer = '';
-  for (const line of sql.split(/\r?\n/)) {
-    const m = line.match(/^\s*DELIMITER\s+(\S+)\s*$/i);
-    if (m) {
-      delimiter = m[1];
-      continue;
-    }
-    buffer += line + '\n';
-    if (line.trimEnd().endsWith(delimiter)) {
-      const stmt = buffer.trimEnd().slice(0, -delimiter.length).trim();
-      const hasCode = stmt.split('\n').some((l) => l.trim() && !l.trim().startsWith('--'));
-      if (hasCode) statements.push(stmt);
-      buffer = '';
-    }
-  }
-  if (buffer.trim()) statements.push(buffer.trim());
-  return statements;
-}
 
 async function runFile(conn: mysql.Connection, file: string) {
   const stmts = splitSql(fs.readFileSync(path.join(root, file), 'utf8'));
@@ -81,6 +60,8 @@ async function main() {
     }
     console.log(`✔ MySQL user '${user}' granted on ${dbName}`);
   }
+  // schema.sql contient déjà toutes les migrations : on les note comme appliquées
+  await markAllMigrationsApplied(conn);
   if (demo) {
     await conn.query(`USE \`${dbName}\``);
     await runFile(conn, 'seed_demo.sql');

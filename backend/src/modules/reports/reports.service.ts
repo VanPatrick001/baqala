@@ -18,8 +18,7 @@ export async function taxReport(from: string, to: string) {
   return (await proc('sp_tax_report', [from, to])).resultSets[0] ?? [];
 }
 
-export async function topProducts(from: string, to: string, limit = 10): Promise<any[]> {
-  const rows = (await proc('sp_top_products', [from, to, limit])).resultSets[0] ?? [];
+async function withTranslations(rows: any[]): Promise<any[]> {
   if (!rows.length) return rows;
   const tr = await query(
     `SELECT product_id, JSON_OBJECTAGG(language_code, name) AS translations FROM product_translations
@@ -28,6 +27,31 @@ export async function topProducts(from: string, to: string, limit = 10): Promise
   );
   const map = new Map(tr.map((t) => [t.product_id, t.translations]));
   return rows.map((r) => ({ ...r, translations: map.get(r.product_id) ?? null }));
+}
+
+export async function topProducts(from: string, to: string, limit = 10): Promise<any[]> {
+  return withTranslations((await proc('sp_top_products', [from, to, limit])).resultSets[0] ?? []);
+}
+
+/**
+ * Bénéfice exact par produit et par mois : chaque ligne vendue garde son coût d'achat réel (lots FEFO)
+ * au moment de la vente. Bénéfice = ventes HT − coût d'achat des articles vendus.
+ */
+export async function productProfit(from: string, to: string): Promise<any[]> {
+  const rows = (await proc('sp_product_profit', [from, to])).resultSets[0] ?? [];
+  return withTranslations(
+    rows.map((r: any) => {
+      const qty = Number(r.qty_sold), revenue = Number(r.revenue_net), cost = Number(r.cost), profit = Number(r.profit);
+      return {
+        ...r,
+        qty_sold: qty, revenue_net: revenue, cost, profit,
+        purchase_price: Number(r.purchase_price), avg_cost: Number(r.avg_cost), sale_price: Number(r.sale_price),
+        avg_sale_price: qty ? Math.round((revenue / qty) * 100) / 100 : 0,
+        avg_purchase_cost: qty ? Math.round((cost / qty) * 100) / 100 : 0,
+        margin_pct: revenue ? Math.round((profit / revenue) * 1000) / 10 : 0,
+      };
+    }),
+  );
 }
 
 /** Données du tableau de bord : KPI, série journalière, top produits, modes de paiement, alertes. */

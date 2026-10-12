@@ -1,0 +1,21 @@
+# BAQALA - démarrage automatique sous Linux (systemd).
+# 1. Adaptez User= et les chemins /opt/baqala à votre installation, puis :
+#    sudo cp deploy/linux/baqala.service /etc/systemd/system/
+#    sudo systemctl daemon-reload && sudo systemctl enable --now baqala
+# 2. Journal : journalctl -u baqala -f
+[Unit]
+Description=BAQALA - gestion de boutique alimentaire
+After=network-online.target mysql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=baqala
+WorkingDirectory=/opt/baqala/backend
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/env node dist/server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -8,12 +8,11 @@ Tout tourne en local : une base **MySQL** sur votre machine, une API Node.js et 
 
 ## 1. Prérequis
 
-
-| Logiciel     | Version                         | Lien                                                                     |
-| ------------ | ------------------------------- | ------------------------------------------------------------------------ |
-| Node.js      | 20 ou plus (22 LTS conseillé)  | https://nodejs.org                                                       |
-| MySQL Server | 8.0 ou plus                     | https://dev.mysql.com/downloads/mysql/ (Windows : « MySQL Installer ») |
-| Navigateur   | Chrome, Edge ou Firefox récent |                                                                          |
+| Logiciel | Version | Lien |
+|---|---|---|
+| Node.js | 20 ou plus (22 LTS conseillé) | https://nodejs.org |
+| MySQL Server | 8.0 ou plus | https://dev.mysql.com/downloads/mysql/ (Windows : « MySQL Installer ») |
+| Navigateur | Chrome, Edge ou Firefox récent | |
 
 Pendant l'installation de MySQL, **notez le mot de passe du compte `root`**. Il sert une seule fois, pour créer la base.
 
@@ -61,7 +60,29 @@ npm run build
 npm start
 ```
 
-Ouvrez **http://localhost:4000**. Un seul port : l'API sert aussi l'interface. Les autres postes du réseau local peuvent ouvrir `http://<IP-du-PC>:4000`.
+Ouvrez **http://localhost:4000**. Un seul port : l'API sert aussi l'interface. Au démarrage, le serveur affiche aussi l'adresse à ouvrir depuis les autres appareils du réseau (`http://<IP-du-PC>:4000`).
+
+### Démarrage automatique, accès à distance, écran tactile
+
+Voir **[GUIDE-PC-DISTANCE-TACTILE.md](GUIDE-PC-DISTANCE-TACTILE.md)** : démarrage avec le PC et caisse en plein écran (`deploy\windows\installer.bat`), accès sécurisé depuis votre téléphone avec Tailscale, réglages pour écran tactile.
+
+### Rôles, règle des 24 h et bénéfice par produit
+
+Voir **[GUIDE-ROLES-BENEFICES.md](GUIDE-ROLES-BENEFICES.md)** : qui peut faire quoi (Administrateur, Manager, Vendeur), correction d'une vente, bénéfice exact par produit et par mois.
+
+### Applications PC et Android, modules par utilisateur
+
+Voir **[GUIDE-APPLICATIONS.md](GUIDE-APPLICATIONS.md)** : application Windows (`BAQALA-Setup-1.0.0.exe`), application Android (`BAQALA-1.0.0.apk`), choix des modules visibles pour chaque utilisateur, logo.
+
+### Mise à jour d'une installation existante
+
+```bash
+npm install
+npm run db:migrate    # applique les évolutions de la base sans toucher aux données
+npm run build
+```
+
+Puis redémarrez le serveur (ou le PC).
 
 ### Mode développement
 
@@ -71,12 +92,12 @@ npm run dev
 
 Interface sur **http://localhost:5173** (rechargement à chaud), API sur le port 4000.
 
-### Première connexion 1
+### Première connexion
 
 - Identifiant : **admin**
 - Mot de passe : **Admin@123**
 
-Le changement de mot de passe est imposé à la première connexion. Créez ensuite les comptes caissiers dans **Paramètres → Utilisateurs** (rôles Administrateur, Gérant, Caissier).
+Le changement de mot de passe est imposé à la première connexion. Créez ensuite les comptes dans **Paramètres → Utilisateurs** : rôles **Administrateur**, **Manager** et **Vendeur** (détails dans [GUIDE-ROLES-BENEFICES.md](GUIDE-ROLES-BENEFICES.md)).
 
 ---
 
@@ -90,17 +111,16 @@ Dans **Paramètres → Taxes** : créez vos taxes (TVA / sales tax, taxes locale
 
 ## 5. Utilisation au quotidien
 
-
-| Écran                 | Ce qu'on y fait                                                                                                                                                                                                                        |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Point de vente**     | Ouvrir la caisse (fond initial), scanner ou rechercher les produits, encaisser en espèces / carte / mobile / crédit client, paiements mixtes, calcul du rendu, impression du ticket. Raccourcis :**F2** recherche, **F9** encaisser. |
-| **Stock**              | Niveaux, lots et dates de péremption, mouvements, pertes et casse, ajustements d'inventaire.                                                                                                                                          |
-| **Achats**             | Fournisseurs, bons de commande, réception (entrée en stock par lot), paiements fournisseurs.                                                                                                                                         |
-| **Clients**            | Comptes crédit (« khata »), plafond, historique, remboursements.                                                                                                                                                                    |
-| **Caisse & dépenses** | Session en cours, dépenses (loyer, salaires, électricité…), clôture avec comptage et écart, rapport Z.                                                                                                                           |
-| **Rapports**           | Bilan journalier, hebdomadaire, mensuel, annuel ; taxes collectées et déductibles ; top produits ; export**Excel** et **PDF**.                                                                                                       |
-| **Tableau de bord**    | Chiffre d'affaires, marges, taxe due, trésorerie, panier moyen, alertes, comparaison avec la période précédente.                                                                                                                   |
-| **Smart Agent**        | Recommandations automatiques (voir ci-dessous).                                                                                                                                                                                        |
+| Écran | Ce qu'on y fait |
+|---|---|
+| **Point de vente** | Ouvrir la caisse (fond initial), scanner ou rechercher les produits, encaisser en espèces / carte / mobile / crédit client, paiements mixtes, calcul du rendu, impression du ticket. Raccourcis : **F2** recherche, **F9** encaisser. |
+| **Stock** | Niveaux, lots et dates de péremption, mouvements, pertes et casse, ajustements d'inventaire. |
+| **Achats** | Fournisseurs, bons de commande, réception (entrée en stock par lot), paiements fournisseurs. |
+| **Clients** | Comptes crédit (« khata »), plafond, historique, remboursements. |
+| **Caisse & dépenses** | Session en cours, dépenses (loyer, salaires, électricité…), clôture avec comptage et écart, rapport Z. |
+| **Rapports** | Bilan journalier, hebdomadaire, mensuel, annuel ; taxes collectées et déductibles ; top produits ; **bénéfice par produit et par mois** ; export **Excel** et **PDF**. |
+| **Tableau de bord** | Chiffre d'affaires, marges, taxe due, trésorerie, panier moyen, alertes, comparaison avec la période précédente. |
+| **Smart Agent** | Recommandations automatiques (voir ci-dessous). |
 
 **Changer de langue :** boutons English / اردو / العربية en haut de l'écran, à tout moment. Le panier en cours, les formulaires et la page ouverte sont conservés. Chaque utilisateur retrouve sa langue à la connexion, et un ticket peut être réimprimé dans une autre langue depuis **Ventes**.
 
@@ -120,6 +140,7 @@ Les seuils se règlent dans **Paramètres → Magasin**.
 
 ## 6. Matériel
 
+- **Écran tactile :** reconnu automatiquement (grandes touches, pavé numérique pour l'encaissement). Détails dans le guide ci-dessus.
 - **Lecteur code-barres :** tout lecteur USB ou Bluetooth en mode « clavier » fonctionne sans pilote. Le curseur est placé automatiquement dans le champ de scan ; le lecteur tape le code puis Entrée.
 - **Imprimante de tickets (58/80 mm) :** installez-la comme imprimante système, puis réglez la largeur dans Paramètres. Dans la fenêtre d'impression du navigateur, choisissez cette imprimante, marges « aucune ». Pour imprimer sans fenêtre, lancez Chrome avec `--kiosk-printing`.
 - **PDF :** le bouton PDF ouvre la fenêtre d'impression ; choisissez « Enregistrer au format PDF ». Cette méthode garantit un rendu parfait de l'arabe et de l'ourdou.
@@ -139,14 +160,13 @@ Planifiez une sauvegarde quotidienne (Planificateur de tâches Windows ou cron) 
 
 ## 8. Problèmes fréquents
 
-
-| Symptôme                                                               | Solution                                                                                                                                                                         |
-| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Access denied for user 'root'` pendant `db:init`                       | Vérifiez`DB_ROOT_PASSWORD`. Sous Linux, root utilise parfois `auth_socket` : `sudo mysql -e "ALTER USER root@localhost IDENTIFIED WITH caching_sha2_password BY 'motdepasse'"`. |
-| `You do not have the SUPER privilege… log_bin_trust_function_creators` | Lancez`db:init` avec le compte root, ou exécutez `SET GLOBAL log_bin_trust_function_creators = 1;` une fois.                                                                    |
-| `ECONNREFUSED 127.0.0.1:3306`                                           | Le service MySQL n'est pas démarré (Windows : Services → MySQL80 → Démarrer ; Linux :`sudo service mysql start`).                                                           |
-| Port 4000 déjà utilisé                                               | Changez`PORT` dans `backend/.env`.                                                                                                                                               |
-| Page blanche après`npm start`                                          | Lancez`npm run build` d'abord.                                                                                                                                                   |
+| Symptôme | Solution |
+|---|---|
+| `Access denied for user 'root'` pendant `db:init` | Vérifiez `DB_ROOT_PASSWORD`. Sous Linux, root utilise parfois `auth_socket` : `sudo mysql -e "ALTER USER root@localhost IDENTIFIED WITH caching_sha2_password BY 'motdepasse'"`. |
+| `You do not have the SUPER privilege… log_bin_trust_function_creators` | Lancez `db:init` avec le compte root, ou exécutez `SET GLOBAL log_bin_trust_function_creators = 1;` une fois. |
+| `ECONNREFUSED 127.0.0.1:3306` | Le service MySQL n'est pas démarré (Windows : Services → MySQL80 → Démarrer ; Linux : `sudo service mysql start`). |
+| Port 4000 déjà utilisé | Changez `PORT` dans `backend/.env`. |
+| Page blanche après `npm start` | Lancez `npm run build` d'abord. |
 
 ---
 

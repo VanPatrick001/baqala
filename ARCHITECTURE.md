@@ -12,7 +12,7 @@ Application web de gestion de superette / boutique alimentaire : stock, caisse (
 | Backend API | **Node.js 20 LTS + TypeScript + Express** | Un seul langage front/back, écosystème riche (PDF, Excel, imprimantes ESC/POS). |
 | Accès BDD | `mysql2/promise` (pool) | Appel direct des procédures stockées, requêtes paramétrées, pas d'ORM qui masquerait la logique SQL. |
 | Validation | `zod` | Validation de chaque requête de l'API. Le calcul du panier (`pos/domain/cart.ts`) est dupliqué côté front pour l'affichage, la base reste l'autorité. |
-| Auth | JWT (durée configurable, 12 h par défaut) + `bcryptjs` | Rôles ADMIN / MANAGER / CASHIER, permissions stockées en JSON. |
+| Auth | JWT (durée configurable, 12 h par défaut) + `bcryptjs` | Rôles ADMIN (tout) / MANAGER (gestion + comptabilité + vendeurs) / CASHIER = Vendeur (caisse, ses ventes < 24 h), permissions JSON modifiables (`/api/roles`). |
 | Smart Agent | `node-cron` + moteur de règles TypeScript au-dessus des procédures `sp_agent_*` | Planification (horaire + à la clôture de caisse), enrichissement et notifications. |
 | Exports | `exceljs` côté serveur (en-têtes traduits, feuilles RTL) ; PDF et tickets via l'impression du navigateur | Le navigateur gère parfaitement la mise en forme arabe/ourdou, ce que les générateurs PDF serveur gèrent mal. |
 | Frontend | **React 18 + Vite + TypeScript** | SPA rapide, idéale pour une caisse. |
@@ -34,7 +34,18 @@ baqala/
 ├── package.json                 # workspaces backend + frontend ; scripts dev / build / start / db:init / db:demo / test
 ├── README.md                    # Guide d'installation
 ├── ARCHITECTURE.md
+├── GUIDE-PC-DISTANCE-TACTILE.md # Démarrage auto, accès à distance (Tailscale), écran tactile
+├── GUIDE-APPLICATIONS.md      # Applications PC / Android, modules par utilisateur, logo
+├── branding/                  # Logo et icônes (SVG, PNG, ICO)
+├── apps/
+│   ├── shared/connect.html    # Écran « adresse du serveur » commun aux deux applications
+│   ├── desktop/               # Application Windows (Electron) : fenêtre dédiée, impression directe des tickets
+│   └── android/               # Application Android (WebView Java, compilée sans Gradle : build-apk.sh)
+├── deploy/
+│   ├── windows/                 # installer.bat/.ps1 (tâche planifiée, pare-feu, raccourci), ouvrir-caisse.bat (kiosque)
+│   └── linux/baqala.service     # unité systemd
 ├── database/
+│   ├── migrations/              # Évolutions de base appliquées par npm run db:migrate
 │   ├── schema.sql               # 34 tables, vues, triggers, 28 procédures, données initiales
 │   └── seed_demo.sql            # Données de démonstration (optionnel)
 │
@@ -47,7 +58,8 @@ baqala/
 │       ├── core/
 │       │   ├── db.ts            # pool mysql2, withConnection (pose @app_user_id pour l'audit), withTransaction, callProcedure
 │       │   ├── errors.ts        # AppError + traduction des SIGNAL SQL (message = clé i18n)
-│       │   ├── auth.ts          # JWT, requireAuth, can('permission')
+│       │   ├── auth.ts          # JWT, requireAuth (droits relus en base, cache 15 s), can('permission')
+│       │   ├── modules.ts       # Modules par utilisateur : permissions effectives = rôle ∩ modules autorisés
 │       │   └── http.ts          # helpers zod (pagination, période, montants)
 │       ├── modules/             # un dossier par domaine
 │       │   ├── auth/ users/ settings/ audit/
@@ -127,8 +139,8 @@ Les règles métier critiques (stock FEFO, taxes figées par ligne, clôture de 
 |---|---|
 | Stock | `sp_stock_in`, `sp_stock_out` (FEFO), `sp_record_waste`, `sp_adjust_stock`, `sp_receive_purchase`, `sp_pay_supplier` |
 | Caisse | `sp_open_cash_session`, `sp_close_cash_session` (rapport Z), `sp_record_cash_movement`, `sp_customer_repayment`, `fn_session_expected_cash` |
-| POS | `sp_pos_checkout`, `sp_void_sale` |
-| Comptabilité | `sp_financial_summary` (CA, marges brute/nette, taxes dues, cash-flow), `sp_period_report` (jour/semaine/mois/année), `sp_tax_report`, `sp_top_products` |
+| POS | `sp_pos_checkout`, `sp_void_sale` (règle des 24 h du vendeur appliquée dans `pos.routes.ts`) |
+| Comptabilité | `sp_financial_summary` (CA, marges brute/nette, taxes dues, cash-flow), `sp_period_report` (jour/semaine/mois/année), `sp_tax_report`, `sp_top_products`, `sp_product_profit` (bénéfice par produit et par mois, coût réel `sale_items.unit_cost`) |
 | Smart Agent | `sp_agent_run`, `sp_agent_rule_low_stock`, `sp_agent_rule_expiry`, `sp_agent_rule_reorder`, `sp_agent_rule_anomalies`, `sp_agent_rule_promotions`, `sp_agent_rule_associations`, `sp_agent_accept_promotion` |
 | Utilitaires | `sp_next_document_number`, `fn_setting` |
 

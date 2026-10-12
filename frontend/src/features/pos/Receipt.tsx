@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { Receipt as ReceiptData } from '../../api/types';
 import { localName } from '../../lib/format';
+import { printDocument } from '../../lib/native';
 
 const LOCALES: Record<string, string> = { en: 'en-US', ur: 'ur-PK-u-nu-latn', ar: 'ar-u-nu-latn' };
 
@@ -70,9 +71,8 @@ export function printReceipt(widthMm = 80) {
   document.head.appendChild(style);
   document.body.classList.add('printing-receipt');
   document.body.style.setProperty('--receipt-width', `${widthMm}mm`);
-  window.print();
-  setTimeout(() => {
+  void printDocument('receipt', widthMm).finally(() => {
     style.remove();
     document.body.classList.remove('printing-receipt');
-  }, 500);
+  });
 }

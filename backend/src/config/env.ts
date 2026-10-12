@@ -8,6 +8,8 @@ function required(name: string, fallback?: string): string {
 
 export const env = {
   port: Number(process.env.PORT ?? 4000),
+  // 0.0.0.0 = joignable depuis le réseau local / Tailscale ; 127.0.0.1 = ce PC uniquement
+  host: process.env.HOST ?? '0.0.0.0',
   nodeEnv: process.env.NODE_ENV ?? 'development',
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
   db: {

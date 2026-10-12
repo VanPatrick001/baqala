@@ -3,3 +3,9 @@ dist/
 .env
 *.xlsx
 *.tsbuildinfo
+logs/
+apps/desktop/node_modules/
+apps/desktop/dist/
+apps/desktop/src/setup/
+apps/android/build/
+apps/android/dist/

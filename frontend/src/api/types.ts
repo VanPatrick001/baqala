@@ -108,7 +108,11 @@ export interface Receipt {
   customerName: string | null;
   customerBalance: number | null;
   voidReason: string | null;
-  items: { id: number; productName: string; translations: Translations; quantity: number; unitPrice: number; discount: number; taxAmount: number; lineTotal: number; promotionId: number | null }[];
+  userId: number;
+  customerId: number | null;
+  /** Âge de la vente en minutes (heure du serveur) : un vendeur ne peut la corriger que pendant 24 h */
+  ageMinutes: number;
+  items: { id: number; productId: number; productName: string; translations: Translations; quantity: number; unitPrice: number; discount: number; taxAmount: number; lineTotal: number; promotionId: number | null }[];
   taxes: { code: string; name: string; type: string; rate: number; translations: Translations; taxable: number; amount: number }[];
   payments: { method: string; amount: number; reference: string | null }[];
   store: { name: string; address: string; phone: string; taxNumber: string; footer: string; currency: string; widthMm: number };

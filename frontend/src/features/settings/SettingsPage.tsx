@@ -1,27 +1,32 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { api, errorKey, type Page } from '../../api/client';
 import { get, useCategories, useMeta, useSettings, useTaxes } from '../../api/hooks';
 import type { Category, Tax } from '../../api/types';
-import { useCan } from '../../stores/auth';
+import { useAuth, useCan } from '../../stores/auth';
 import { toast } from '../../stores/toast';
 import { useFormat } from '../../lib/format';
 import { Badge, Empty, Field, Loading, Modal, NumberInput, PageHeader, Pagination, Tabs } from '../../components/ui';
+import { MODULES } from '../../lib/modules';
 
-type Tab = 'store' | 'taxes' | 'categories' | 'users' | 'audit';
+type Tab = 'store' | 'taxes' | 'categories' | 'users' | 'roles' | 'audit';
 
 export function SettingsPage() {
   const { t } = useTranslation();
   const canSettings = useCan('settings.manage');
-  const canUsers = useCan('users.manage');
+  const canUsers = useCan('users.manage', 'users.manage_sellers');
+  const canRoles = useCan('roles.manage');
+  const canTaxes = useCan('taxes.view');
+  const canCategories = useCan('products.view');
   const canAudit = useCan('audit.view');
   const tabs: { value: Tab; label: string }[] = [
     ...(canSettings ? [{ value: 'store' as Tab, label: t('settings.tabs.store') }] : []),
-    { value: 'taxes', label: t('settings.tabs.taxes') },
-    { value: 'categories', label: t('settings.tabs.categories') },
+    ...(canTaxes ? [{ value: 'taxes' as Tab, label: t('settings.tabs.taxes') }] : []),
+    ...(canCategories ? [{ value: 'categories' as Tab, label: t('settings.tabs.categories') }] : []),
     ...(canUsers ? [{ value: 'users' as Tab, label: t('settings.tabs.users') }] : []),
+    ...(canRoles ? [{ value: 'roles' as Tab, label: t('settings.tabs.roles') }] : []),
     ...(canAudit ? [{ value: 'audit' as Tab, label: t('settings.tabs.audit') }] : []),
   ];
   const [tab, setTab] = useState<Tab>(tabs[0].value);
@@ -33,6 +38,7 @@ export function SettingsPage() {
       {tab === 'taxes' && <Taxes />}
       {tab === 'categories' && <Categories />}
       {tab === 'users' && <Users />}
+      {tab === 'roles' && <Roles />}
       {tab === 'audit' && <Audit />}
     </div>
   );
@@ -206,11 +212,21 @@ function Users() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: meta } = useMeta();
+  const me = useAuth((s) => s.user);
+  const isAdmin = useCan('users.manage');
   const { data, isLoading } = useQuery({ queryKey: ['users'], queryFn: () => get<any[]>('/users') });
   const [editing, setEditing] = useState<any | null>(null);
+  // Le manager ne crée et ne gère que des vendeurs
+  const roles = (meta?.roles ?? []).filter((r) => isAdmin || r.code === 'CASHIER');
+  const sellerRoleId = meta?.roles.find((r) => r.code === 'CASHIER')?.id;
+  const remove = useMutation({
+    mutationFn: (id: number) => api.delete(`/users/${id}`),
+    onSuccess: () => { toast.success('common.saved'); qc.invalidateQueries({ queryKey: ['users'] }); },
+    onError: (e) => toast.error(errorKey(e)),
+  });
   const save = useMutation({
     mutationFn: (u: any) => {
-      const body = { username: u.username, fullName: u.fullName, email: u.email || null, phone: u.phone || null, roleId: u.roleId, preferredLanguage: u.preferredLanguage ?? 'en', isActive: !!u.isActive, password: u.password || undefined };
+      const body = { username: u.username, fullName: u.fullName, email: u.email || null, phone: u.phone || null, roleId: u.roleId, preferredLanguage: u.preferredLanguage ?? 'en', isActive: !!u.isActive, password: u.password || undefined, modules: u.modules ?? null };
       return u.id ? api.put(`/users/${u.id}`, body) : api.post('/users', body);
     },
     onSuccess: () => { toast.success('common.saved'); qc.invalidateQueries({ queryKey: ['users'] }); setEditing(null); },
@@ -218,18 +234,28 @@ function Users() {
   });
   return (
     <div className="card">
-      <div className="flex justify-end border-b border-slate-200 p-3"><button className="btn-primary" onClick={() => setEditing({ roleId: 3, isActive: 1, preferredLanguage: 'en' })}><Plus size={16} /> {t('settings.users.new')}</button></div>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 p-3">
+        <p className="text-sm text-slate-600">{isAdmin ? t('settings.users.hintAdmin') : t('settings.users.hintManager')}</p>
+        <button className="btn-primary" onClick={() => setEditing({ roleId: sellerRoleId, isActive: 1, preferredLanguage: 'en' })}><Plus size={16} /> {isAdmin ? t('settings.users.new') : t('settings.users.newSeller')}</button>
+      </div>
       {isLoading ? <Loading /> : (
         <table className="table">
-          <thead><tr><th>{t('auth.username')}</th><th>{t('customers.fullName')}</th><th>{t('settings.users.role')}</th><th>{t('settings.users.language')}</th><th>{t('settings.users.lastLogin')}</th><th>{t('common.status')}</th><th /></tr></thead>
+          <thead><tr><th>{t('auth.username')}</th><th>{t('customers.fullName')}</th><th>{t('settings.users.role')}</th><th>{t('settings.users.language')}</th><th>{t('settings.users.modules')}</th><th>{t('settings.users.lastLogin')}</th><th>{t('common.status')}</th><th /></tr></thead>
           <tbody>
             {data?.map((u) => (
               <tr key={u.id}>
                 <td className="num font-semibold">{u.username}</td><td>{u.fullName}</td><td>{t(`roles.${u.role}`)}</td>
                 <td>{meta?.languages.find((l) => l.code === u.preferredLanguage)?.nativeName}</td>
+                <td className="text-xs text-slate-600">{u.modules ? u.modules.map((m: string) => t(`nav.${m}`)).join(', ') : t('settings.users.allModules')}</td>
                 <td className="num text-xs">{u.lastLoginAt ?? '—'}</td>
                 <td>{u.isActive ? <Badge color="green">{t('common.active')}</Badge> : <Badge>{t('common.inactive')}</Badge>}</td>
-                <td><button className="btn-ghost p-1.5" onClick={() => setEditing(u)}><Pencil size={15} /></button></td>
+                <td className="whitespace-nowrap text-end">
+                  <button className="btn-ghost p-1.5" aria-label={t('common.edit')} onClick={() => setEditing(u)}><Pencil size={15} /></button>
+                  {isAdmin && u.id !== me?.id && (
+                    <button className="btn-ghost p-1.5 text-red-600" aria-label={t('common.delete')}
+                      onClick={() => window.confirm(t('settings.users.confirmDelete', { name: u.fullName })) && remove.mutate(u.id)}><Trash2 size={15} /></button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -243,7 +269,7 @@ function Users() {
             <Field label={t('customers.fullName')}><input className="input" value={editing.fullName ?? ''} onChange={(e) => setEditing({ ...editing, fullName: e.target.value })} /></Field>
             <Field label={t('settings.users.role')}>
               <select className="input" value={editing.roleId} onChange={(e) => setEditing({ ...editing, roleId: Number(e.target.value) })}>
-                {meta?.roles.map((r) => <option key={r.id} value={r.id}>{t(`roles.${r.code}`)}</option>)}
+                {roles.map((r) => <option key={r.id} value={r.id}>{t(`roles.${r.code}`)}</option>)}
               </select>
             </Field>
             <Field label={t('settings.users.language')}>
@@ -255,8 +281,94 @@ function Users() {
             <Field label={editing.id ? t('settings.users.resetPassword') : t('auth.password')} hint={t('auth.passwordRule')}><input type="password" className="input" value={editing.password ?? ''} onChange={(e) => setEditing({ ...editing, password: e.target.value })} /></Field>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!editing.isActive} onChange={(e) => setEditing({ ...editing, isActive: e.target.checked ? 1 : 0 })} /> {t('common.active')}</label>
           </div>
+          <ModulePicker value={editing.modules ?? null} onChange={(modules) => setEditing({ ...editing, modules })} />
         </Modal>
       )}
+    </div>
+  );
+}
+
+/** Modules visibles pour l'utilisateur : tous ceux de son rôle, ou une sélection. */
+function ModulePicker({ value, onChange }: { value: string[] | null; onChange: (v: string[] | null) => void }) {
+  const { t } = useTranslation();
+  const toggle = (m: string) => onChange(value!.includes(m) ? value!.filter((x) => x !== m) : [...value!, m]);
+  return (
+    <fieldset className="mt-4 rounded-lg border border-slate-200 p-3">
+      <legend className="px-1 text-sm font-semibold text-slate-700">{t('settings.users.modules')}</legend>
+      <div className="mb-2 flex flex-wrap gap-4 text-sm">
+        <label className="flex items-center gap-2"><input type="radio" checked={value === null} onChange={() => onChange(null)} /> {t('settings.users.allModules')}</label>
+        <label className="flex items-center gap-2"><input type="radio" checked={value !== null} onChange={() => onChange(value ?? ['pos'])} /> {t('settings.users.chooseModules')}</label>
+      </div>
+      {value !== null && (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {MODULES.map((m) => (
+            <label key={m} className="flex items-center gap-2 rounded-md border border-slate-200 px-2 py-1.5 text-sm">
+              <input type="checkbox" checked={value.includes(m)} onChange={() => toggle(m)} /> {t(`nav.${m}`)}
+            </label>
+          ))}
+        </div>
+      )}
+      <p className="mt-2 text-xs text-slate-500">{t('settings.users.modulesHint')}</p>
+    </fieldset>
+  );
+}
+
+/** Domaine d'une permission -> module affiché (mêmes regroupements que le serveur). */
+const PERM_GROUP: Record<string, string> = {
+  dashboard: 'dashboard', pos: 'pos', sales: 'sales', products: 'products', stock: 'inventory', purchases: 'purchases',
+  suppliers: 'purchases', customers: 'customers', cash: 'cash', reports: 'reports', agent: 'agent', taxes: 'settings',
+  settings: 'settings', users: 'settings', audit: 'settings',
+};
+
+/** Droits de chaque rôle (administrateur uniquement). Le rôle Administrateur garde toujours tous les droits. */
+function Roles() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const { data: roles, isLoading } = useQuery({ queryKey: ['roles'], queryFn: () => get<{ id: number; code: string; permissions: string[] }[]>('/roles') });
+  const { data: perms } = useQuery({ queryKey: ['permissions'], queryFn: () => get<string[]>('/roles/permissions') });
+  const [draft, setDraft] = useState<Record<number, string[]>>({});
+  const save = useMutation({
+    mutationFn: (r: { id: number; permissions: string[] }) => api.put(`/roles/${r.id}`, { permissions: r.permissions }),
+    onSuccess: (_d, r) => {
+      toast.success('common.saved');
+      setDraft((d) => { const n = { ...d }; delete n[r.id]; return n; });
+      qc.invalidateQueries({ queryKey: ['roles'] });
+    },
+    onError: (e) => toast.error(errorKey(e)),
+  });
+  if (isLoading || !roles || !perms) return <Loading />;
+  // Les rôles stockent parfois des jokers (« sales.* ») : on les développe pour cocher les cases
+  const expand = (list: string[]) => perms.filter((p) => list.includes('*') || list.includes(p) || list.includes(`${p.split('.')[0]}.*`));
+  const groups = [...new Set(perms.map((p) => PERM_GROUP[p.split('.')[0]] ?? 'settings'))];
+  return (
+    <div className="grid gap-4 xl:grid-cols-3">
+      {roles.map((r) => {
+        const locked = r.code === 'ADMIN';
+        const current = draft[r.id] ?? expand(r.permissions);
+        const toggle = (p: string) => setDraft({ ...draft, [r.id]: current.includes(p) ? current.filter((x) => x !== p) : [...current, p] });
+        return (
+          <div key={r.id} className="card p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h3 className="text-lg font-semibold">{t(`roles.${r.code}`)}</h3>
+              {locked ? <Badge><Lock size={12} className="inline" /> {t('settings.roles.allRights')}</Badge> : (
+                <button className="btn-primary" disabled={!draft[r.id] || save.isPending} onClick={() => save.mutate({ id: r.id, permissions: current })}>{t('common.save')}</button>
+              )}
+            </div>
+            <p className="mb-3 text-xs text-slate-500">{t(`settings.roles.describe.${r.code}`)}</p>
+            {groups.map((g) => (
+              <fieldset key={g} className="mb-3">
+                <legend className="mb-1 text-xs font-semibold uppercase text-slate-500">{t(`nav.${g}`)}</legend>
+                {perms.filter((p) => (PERM_GROUP[p.split('.')[0]] ?? 'settings') === g).map((p) => (
+                  <label key={p} className="flex items-center gap-2 py-0.5 text-sm">
+                    <input type="checkbox" disabled={locked} checked={locked || current.includes(p)} onChange={() => toggle(p)} />
+                    {t(`permissions.${p.replace('.', '_')}`)}
+                  </label>
+                ))}
+              </fieldset>
+            ))}
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -36,6 +36,12 @@ reportsRouter.get('/top-products', ah(async (req, res) => {
   res.json(await svc.topProducts(from, to, z.coerce.number().int().min(1).max(100).default(10).parse(req.query.limit)));
 }));
 
+/** Bénéfice par produit et par mois (période libre, regroupée par mois). */
+reportsRouter.get('/product-profit', can('reports.view'), ah(async (req, res) => {
+  const { from, to } = resolvePeriod(periodQuery.parse(req.query));
+  res.json(await svc.productProfit(from, to));
+}));
+
 /** Export Excel (le PDF est généré côté navigateur pour un rendu arabe/ourdou correct). */
 reportsRouter.get('/export.xlsx', can('reports.view'), ah(async (req, res) => {
   const { from, to } = resolvePeriod(periodQuery.parse(req.query));

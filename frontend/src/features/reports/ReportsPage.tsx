@@ -6,8 +6,10 @@ import { api } from '../../api/client';
 import { get, useSettings } from '../../api/hooks';
 import { toast } from '../../stores/toast';
 import { daysAgo, today, useFormat } from '../../lib/format';
-import { DateRange, Loading, PageHeader } from '../../components/ui';
+import { DateRange, Loading, PageHeader, Tabs } from '../../components/ui';
+import { ProductProfit } from './ProductProfit';
 import { ChartCard, TrendChart } from '../../components/charts';
+import { printDocument, saveBlob } from '../../lib/native';
 
 type Gran = 'DAY' | 'WEEK' | 'MONTH' | 'YEAR';
 const SUMMARY_ROWS: [string, 'money' | 'pct' | 'int'][] = [
@@ -23,6 +25,7 @@ export function ReportsPage() {
   const { data: settings } = useSettings();
   const [range, setRange] = useState({ from: daysAgo(29), to: today() });
   const [gran, setGran] = useState<Gran>('DAY');
+  const [tab, setTab] = useState<'overview' | 'profit'>('overview');
   const params = { ...range, granularity: gran };
   const summary = useQuery({ queryKey: ['r-summary', range], queryFn: () => get<Record<string, number>>('/reports/summary', range) });
   const period = useQuery({ queryKey: ['r-period', params], queryFn: () => get<any[]>('/reports/period', params) });
@@ -34,19 +37,14 @@ export function ReportsPage() {
   const exportExcel = async () => {
     try {
       const res = await api.get('/reports/export.xlsx', { params: { ...params, lang: i18n.language }, responseType: 'blob' });
-      const url = URL.createObjectURL(res.data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `baqala-${range.from}_${range.to}.xlsx`;
-      a.click();
-      URL.revokeObjectURL(url);
+      await saveBlob(res.data, `baqala-${range.from}_${range.to}.xlsx`);
     } catch {
       toast.error('errors.server');
     }
   };
 
   // PDF : la mise en page d'impression du navigateur rend correctement l'arabe et l'ourdou (RTL).
-  const exportPdf = () => window.print();
+  const exportPdf = () => void printDocument('page');
 
   const loading = summary.isLoading || period.isLoading || taxes.isLoading || top.isLoading;
 
@@ -54,7 +52,7 @@ export function ReportsPage() {
     <div>
       <PageHeader
         title={t('reports.title')}
-        actions={
+        actions={tab === 'overview' && (
           <>
             <select className="input w-auto" value={gran} onChange={(e) => setGran(e.target.value as Gran)}>
               {(['DAY', 'WEEK', 'MONTH', 'YEAR'] as Gran[]).map((g) => <option key={g} value={g}>{t(`reports.granularity.${g}`)}</option>)}
@@ -63,9 +61,10 @@ export function ReportsPage() {
             <button className="btn-secondary" onClick={exportExcel}><FileSpreadsheet size={16} /> Excel</button>
             <button className="btn-secondary" onClick={exportPdf}><FileDown size={16} /> PDF</button>
           </>
-        }
+        )}
       />
-      {loading ? <Loading /> : (
+      <Tabs value={tab} onChange={setTab} tabs={[{ value: 'overview', label: t('reports.tabs.overview') }, { value: 'profit', label: t('reports.tabs.profit') }]} />
+      {tab === 'profit' ? <ProductProfit /> : loading ? <Loading /> : (
         <div className="print-area space-y-4">
           <div className="hidden text-center print:block">
             <h1 className="text-xl font-bold">{settings?.store_name as string} — {t('reports.title')}</h1>

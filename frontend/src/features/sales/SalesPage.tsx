@@ -4,7 +4,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorKey, type Page } from '../../api/client';
 import { get } from '../../api/hooks';
 import type { Receipt as ReceiptData } from '../../api/types';
-import { useCan } from '../../stores/auth';
+import { useNavigate } from 'react-router-dom';
+import type { Product } from '../../api/types';
+import { useAuth, useCan } from '../../stores/auth';
+import { useCart } from '../../stores/cart';
 import { toast } from '../../stores/toast';
 import { daysAgo, today, useFormat } from '../../lib/format';
 import { Badge, DateRange, Empty, Loading, Modal, PageHeader, Pagination } from '../../components/ui';
@@ -66,21 +69,51 @@ export function SalesPage() {
 function SaleDialog({ id, onClose }: { id: number; onClose: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const canVoid = useCan('sales.void');
+  const navigate = useNavigate();
+  const me = useAuth((s) => s.user);
+  const canVoidAny = useCan('sales.void');
+  const canVoidOwn = useCan('sales.void_own');
+  const canPos = useCan('pos.use');
   const { data } = useQuery({ queryKey: ['sale', id], queryFn: () => get<ReceiptData>(`/sales/${id}`) });
+  // Manager / administrateur : toujours. Vendeur : ses propres ventes de moins de 24 h.
+  const within24h = !!data && data.ageMinutes < 24 * 60;
+  const canVoid = !!data && (canVoidAny || (canVoidOwn && data.userId === me?.id && within24h));
+  const tooOld = !!data && !canVoidAny && canVoidOwn && data.status === 'COMPLETED' && data.userId === me?.id && !within24h;
+  const [correct, setCorrect] = useState(false);
   const [lang, setLang] = useState<string | undefined>();
   const [reason, setReason] = useState('');
   const [voiding, setVoiding] = useState(false);
   const voidSale = useMutation({
     mutationFn: () => api.post(`/sales/${id}/void`, { reason }),
-    onSuccess: () => { toast.success('sales.voidedOk'); ['sales', 'sale', 'session', 'pos-catalog'].forEach((k) => qc.invalidateQueries({ queryKey: [k] })); setVoiding(false); },
+    onSuccess: async () => {
+      toast.success('sales.voidedOk');
+      ['sales', 'sale', 'session', 'pos-catalog'].forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+      setVoiding(false);
+      if (correct && data) {
+        // Correction : la vente annulée revient dans le panier, à modifier puis encaisser à nouveau
+        const catalog = await qc.fetchQuery({ queryKey: ['pos-catalog'], queryFn: () => get<Page<Product>>('/products', { active: 'true', pageSize: 500 }) });
+        const cart = useCart.getState();
+        cart.clear();
+        for (const it of data.items) {
+          const p = catalog.rows.find((x) => x.id === it.productId);
+          if (!p) continue;
+          cart.add(p, it.quantity);
+          if (it.discount) cart.setDiscount(p.id, it.discount);
+        }
+        cart.setCustomer(data.customerId ?? null);
+        navigate('/pos');
+      }
+    },
     onError: (e) => toast.error(errorKey(e)),
   });
   return (
     <Modal open onClose={onClose} title={data?.receiptNo ?? ''} size="sm"
       footer={
         <>
-          {canVoid && data?.status === 'COMPLETED' && <button className="btn-ghost text-red-600" onClick={() => setVoiding(true)}>{t('sales.void')}</button>}
+          {canVoid && data?.status === 'COMPLETED' && <>
+            <button className="btn-ghost text-red-600" onClick={() => { setCorrect(false); setVoiding(true); }}>{t('sales.void')}</button>
+            {canPos && <button className="btn-secondary" onClick={() => { setCorrect(true); setVoiding(true); }}>{t('sales.correct')}</button>}
+          </>}
           <button className="btn-primary" onClick={() => printReceipt(data?.store.widthMm)}>{t('pos.printReceipt')}</button>
         </>
       }>
@@ -91,11 +124,13 @@ function SaleDialog({ id, onClose }: { id: number; onClose: () => void }) {
             {LANGUAGES.map((l) => <button key={l.code} className={(lang ?? data.language) === l.code ? 'font-bold text-brand-800 underline' : 'text-slate-500'} onClick={() => setLang(l.code)}>{l.label}</button>)}
           </div>
           <div className="print-area rounded border border-slate-200"><Receipt receipt={data} lang={lang} /></div>
+          {tooOld && <p className="mt-2 rounded-lg bg-amber-50 p-2 text-sm text-amber-800">{t('sales.lockedAfter24h')}</p>}
           {data.status === 'VOIDED' && <p className="mt-2 text-sm text-red-700">{t('sales.voidReason')}: {data.voidReason}</p>}
           {voiding && (
             <div className="mt-3 space-y-2 rounded-lg bg-red-50 p-3">
+              {correct && <p className="text-sm text-slate-700">{t('sales.correctHint')}</p>}
               <input className="input" placeholder={t('sales.voidReason')} value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
-              <button className="btn-danger w-full" disabled={reason.trim().length < 3 || voidSale.isPending} onClick={() => voidSale.mutate()}>{t('sales.confirmVoid')}</button>
+              <button className="btn-danger w-full" disabled={reason.trim().length < 3 || voidSale.isPending} onClick={() => voidSale.mutate()}>{correct ? t('sales.confirmCorrect') : t('sales.confirmVoid')}</button>
             </div>
           )}
         </>

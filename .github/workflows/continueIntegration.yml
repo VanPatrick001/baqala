@@ -24,7 +24,7 @@ jobs:
       - name: Vérifier les types
         run: npm run typecheck -w @baqala/backend
 
-      - name: Build
+      - name: Build test ci
         run: npm run build -w @baqala/backend
 
       - name: Tests

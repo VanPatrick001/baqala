@@ -1,4 +1,4 @@
-name: Backend CI
+name: Node.js CI
 
 on:
   push:
@@ -7,25 +7,31 @@ on:
     branches: [ main ]
 
 jobs:
-  backend:
+  lint-test-build:
     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+    strategy:
+      matrix:
+        node-version: [22.x]
 
-      - uses: actions/setup-node@v4
+    steps:
+      - name: Récupérer le code (Checkout)
+        uses: actions/checkout@v4
+
+      - name: Configurer Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      - name: Installation des dépendances
+      - name: Installer les dépendances
         run: npm ci
 
-      - name: Vérifier les types
-        run: npm run typecheck -w @baqala/backend
+      - name: Vérifier le style du code (Linter)
+        run: npm run lint --if-present
 
-      - name: Build test ci
-        run: npm run build -w @baqala/backend
+      - name: Exécuter les tests unitaires
+        run: npm test
 
-      - name: Tests
-        run: npm test -w @baqala/backend
+      - name: Vérifier la compilation (Build)
+        run: npm run build --if-present

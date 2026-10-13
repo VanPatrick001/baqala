@@ -31,7 +31,7 @@ export function Layout() {
     queryKey: ['agent-summary'],
     queryFn: () => get<{ counts: { severity: string; count: number }[] }>('/agent/summary'),
     enabled: canAgent,
-    refetchInterval: 60_000,
+    refetchInterval: 20_000,
   });
   const critical = agent?.counts.filter((c) => c.severity !== 'INFO').reduce((s, c) => s + c.count, 0) ?? 0;
 
@@ -39,7 +39,7 @@ export function Layout() {
   useQuery({
     queryKey: ['me'],
     queryFn: async () => { const me = await get<User>('/auth/me'); setUser(me); return me; },
-    refetchInterval: 60_000,
+    refetchInterval: 20_000,
     refetchOnWindowFocus: true,
   });
 

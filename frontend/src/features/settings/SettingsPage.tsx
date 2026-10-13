@@ -246,7 +246,7 @@ function Users() {
               <tr key={u.id}>
                 <td className="num font-semibold">{u.username}</td><td>{u.fullName}</td><td>{t(`roles.${u.role}`)}</td>
                 <td>{meta?.languages.find((l) => l.code === u.preferredLanguage)?.nativeName}</td>
-                <td className="text-xs text-slate-600">{u.modules ? u.modules.map((m: string) => t(`nav.${m}`)).join(', ') : t('settings.users.allModules')}</td>
+                <td className="text-xs text-slate-600">{u.modules && u.role !== 'ADMIN' ? u.modules.map((m: string) => t(`nav.${m}`)).join(', ') : t('settings.users.allModules')}</td>
                 <td className="num text-xs">{u.lastLoginAt ?? '—'}</td>
                 <td>{u.isActive ? <Badge color="green">{t('common.active')}</Badge> : <Badge>{t('common.inactive')}</Badge>}</td>
                 <td className="whitespace-nowrap text-end">
@@ -281,7 +281,9 @@ function Users() {
             <Field label={editing.id ? t('settings.users.resetPassword') : t('auth.password')} hint={t('auth.passwordRule')}><input type="password" className="input" value={editing.password ?? ''} onChange={(e) => setEditing({ ...editing, password: e.target.value })} /></Field>
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!editing.isActive} onChange={(e) => setEditing({ ...editing, isActive: e.target.checked ? 1 : 0 })} /> {t('common.active')}</label>
           </div>
-          <ModulePicker value={editing.modules ?? null} onChange={(modules) => setEditing({ ...editing, modules })} />
+          {meta?.roles.find((r) => r.id === editing.roleId)?.code === 'ADMIN'
+            ? <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{t('settings.users.adminAllModules')}</p>
+            : <ModulePicker value={editing.modules ?? null} onChange={(modules) => setEditing({ ...editing, modules })} />}
         </Modal>
       )}
     </div>
@@ -355,6 +357,7 @@ function Roles() {
               )}
             </div>
             <p className="mb-3 text-xs text-slate-500">{t(`settings.roles.describe.${r.code}`)}</p>
+            {r.code === 'MANAGER' && <p className="mb-3 rounded-md bg-brand-50 p-2 text-xs text-brand-800">{t('settings.roles.managerIncludesSeller')}</p>}
             {groups.map((g) => (
               <fieldset key={g} className="mb-3">
                 <legend className="mb-1 text-xs font-semibold uppercase text-slate-500">{t(`nav.${g}`)}</legend>

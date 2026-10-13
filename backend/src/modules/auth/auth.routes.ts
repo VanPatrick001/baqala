@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { execute, queryOne } from '../../core/db.js';
 import { ah, AppError } from '../../core/errors.js';
 import { requireAuth, signToken, userId, type AuthUser } from '../../core/auth.js';
-import { effectivePermissions, parseModules } from '../../core/modules.js';
+import { ACCESS_COLUMNS, userModules, userPermissions } from '../../core/modules.js';
 import { lang } from '../../core/http.js';
 
 export const authRouter = Router();
@@ -27,9 +27,9 @@ function recordFailure(key: string) {
 }
 
 async function loadUser(where: string, param: unknown) {
-  return queryOne(
+  return queryOne<any>(
     `SELECT u.id, u.username, u.full_name, u.email, u.password_hash, u.preferred_language,
-            u.must_change_password, u.is_active, u.modules, r.code AS role, r.permissions
+            u.must_change_password, u.is_active, ${ACCESS_COLUMNS}
        FROM users u JOIN roles r ON r.id = u.role_id WHERE ${where}`,
     [param],
   );
@@ -42,8 +42,8 @@ function publicUser(u: any) {
     fullName: u.full_name,
     email: u.email,
     role: u.role,
-    permissions: effectivePermissions(u.permissions, parseModules(u.modules)),
-    modules: parseModules(u.modules),
+    permissions: userPermissions(u),
+    modules: userModules(u),
     preferredLanguage: u.preferred_language,
     mustChangePassword: !!u.must_change_password,
   };
@@ -67,7 +67,7 @@ authRouter.post(
        VALUES (?, 'LOGIN', 'user', ?, ?, ?)`,
       [u.id, u.id, req.ip, String(req.headers['user-agent'] ?? '').slice(0, 255)],
     );
-    const authUser: AuthUser = { id: u.id, username: u.username, role: u.role, permissions: effectivePermissions(u.permissions, parseModules(u.modules)) };
+    const authUser: AuthUser = { id: u.id, username: u.username, role: u.role, permissions: userPermissions(u) };
     res.json({ token: signToken(authUser), user: publicUser(u) });
   }),
 );

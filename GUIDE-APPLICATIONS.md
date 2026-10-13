@@ -63,20 +63,21 @@ Android 6 ou plus récent. Pour l'utiliser **hors du magasin**, installez aussi 
 
 ## 4. Modules par utilisateur
 
-Chaque compte peut ne voir que les modules dont il a besoin.
+Pour chaque compte, vous choisissez précisément les modules ouverts : on peut en retirer, et aussi en **ajouter** au-delà du rôle.
 
 **Paramètres → Utilisateurs → ✎ (modifier) → Modules**
 
 - **Tous les modules du rôle** : comportement par défaut.
-- **Seulement ces modules** : cochez par exemple *Caisse* pour un vendeur, *Tableau de bord + Rapports* pour un associé qui suit les chiffres depuis son téléphone, *Stock + Achats* pour un magasinier.
+- **Seulement ces modules** : la personne a exactement les modules cochés. Par exemple *Caisse + Rapports* pour un vendeur de confiance, *Tableau de bord + Rapports* pour un associé qui suit les chiffres depuis son téléphone, *Stock + Achats* pour un magasinier.
 
 Modules disponibles : Tableau de bord, Caisse, Ventes, Produits, Stock, Achats (et fournisseurs), Clients, Caisse & dépenses, Rapports, Smart Agent, Paramètres.
 
 Bon à savoir :
 
-- Le **rôle** (Administrateur, Manager, Vendeur) reste la limite : cocher « Paramètres » pour un vendeur ne lui donne pas le droit de gérer les utilisateurs. Voir [GUIDE-ROLES-BENEFICES.md](GUIDE-ROLES-BENEFICES.md).
+- Un module coché donne **l'accès de base** (consulter, utiliser au quotidien), même si le rôle ne l'avait pas : un vendeur avec *Rapports* coché voit les rapports et le bénéfice par produit. Les **droits de gestion** (comptabilité, prix, utilisateurs, droits) viennent toujours du rôle : cocher *Caisse & dépenses* pour un vendeur ne lui permet pas de saisir des dépenses. Voir [GUIDE-ROLES-BENEFICES.md](GUIDE-ROLES-BENEFICES.md).
+- L'**administrateur** a toujours tous les modules et tous les droits.
 - Un module garde ce dont il a besoin pour fonctionner : un vendeur limité à la Caisse peut toujours chercher les produits et choisir un client pendant la vente.
-- Le changement s'applique **en moins d'une minute**, sans que la personne ait à se reconnecter. Un compte désactivé est coupé tout de suite.
+- Le changement s'applique **en une vingtaine de secondes**, sans que la personne ait à se reconnecter. Un compte désactivé est coupé tout de suite.
 - Vous ne pouvez pas retirer le module Paramètres à votre propre compte (pour ne jamais vous enfermer dehors).
 
 **Base créée avant cette version :** lancez une fois `npm run db:migrate` sur le PC du magasin (vos données sont conservées), puis `npm run build` et redémarrez le PC.

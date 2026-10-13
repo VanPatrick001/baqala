@@ -588,11 +588,12 @@
       "modules": "Modules",
       "allModules": "All modules of the role",
       "chooseModules": "Only these modules",
-      "modulesHint": "The role still decides what the user may do inside each module.",
+      "modulesHint": "Each ticked module is opened to this user (viewing and everyday use). Management rights (accounting, prices, users) still come from the role.",
       "newSeller": "New seller",
       "hintAdmin": "You can add, edit and delete every user, and change roles and their rights.",
       "hintManager": "As manager, you add and manage sellers.",
-      "confirmDelete": "Delete the user {{name}}? Their past sales are kept."
+      "confirmDelete": "Delete the user {{name}}? Their past sales are kept.",
+      "adminAllModules": "An administrator always has every module and every right."
     },
     "audit": {
       "action": "Action",
@@ -605,7 +606,8 @@
         "ADMIN": "Can do everything: users, roles and rights, accounting, settings.",
         "MANAGER": "Runs the shop and the accounting (expenses, cash, taxes, reports). Adds and manages sellers.",
         "CASHIER": "Sells at the till. Can correct or void only their own sales, within 24 hours. No access to accounting."
-      }
+      },
+      "managerIncludesSeller": "The manager also gets every right given to the Seller."
     }
   },
   "errors": {

@@ -31,12 +31,41 @@ export async function markAllMigrationsApplied(conn: mysql.Connection) {
   }
 }
 
+/** Mot de passe saisi sans être affiché (si DB_ROOT_PASSWORD n'est pas dans backend/.env). */
+function askHidden(question: string): Promise<string> {
+  return new Promise((resolve) => {
+    const stdin = process.stdin;
+    process.stdout.write(question);
+    let value = '';
+    stdin.setRawMode?.(true);
+    stdin.resume();
+    stdin.setEncoding('utf8');
+    const onData = (ch: string) => {
+      for (const c of ch) {
+        if (c === '\r' || c === '\n') {
+          stdin.setRawMode?.(false);
+          stdin.pause();
+          stdin.off('data', onData);
+          process.stdout.write('\n');
+          return resolve(value);
+        }
+        if (c === '\u0003') process.exit(1);
+        if (c === '\u007f' || c === '\b') value = value.slice(0, -1);
+        else value += c;
+      }
+    };
+    stdin.on('data', onData);
+  });
+}
+
 async function main() {
+  let password = process.env.DB_ROOT_PASSWORD;
+  if (!password && process.stdin.isTTY) password = await askHidden('Mot de passe root de MySQL : ');
   const conn = await mysql.createConnection({
     host: process.env.DB_HOST ?? '127.0.0.1',
     port: Number(process.env.DB_PORT ?? 3306),
     user: process.env.DB_ROOT_USER ?? 'root',
-    password: process.env.DB_ROOT_PASSWORD ?? '',
+    password: password ?? '',
     charset: 'UTF8MB4_0900_AI_CI',
   });
   await ensureTable(conn);

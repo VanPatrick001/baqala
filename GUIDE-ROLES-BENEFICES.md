@@ -32,9 +32,9 @@ Ces règles sont vérifiées **par le serveur**, pas seulement cachées à l'éc
   - Un utilisateur supprimé ne peut plus se connecter ; ses ventes passées gardent son nom ; son identifiant redevient libre.
   - Il reste toujours au moins un administrateur actif, et personne ne peut supprimer son propre compte.
 
-**Paramètres → Rôles et droits** (administrateur) : cochez ou décochez les droits du Manager et du Vendeur, puis **Enregistrer**. Le changement s'applique en quelques secondes, sans reconnexion. Le rôle Administrateur garde toujours tous les droits.
+**Paramètres → Rôles et droits** (administrateur) : cochez ou décochez les droits du Manager et du Vendeur, puis **Enregistrer**. Le changement s'applique en une vingtaine de secondes, sans reconnexion. Le rôle Administrateur garde toujours tous les droits. Le **Manager reçoit automatiquement tous les droits du Vendeur**, y compris ceux que vous ajoutez au Vendeur. Un droit de gestion donne aussi la consultation (par exemple « Ajuster le stock » donne aussi « Voir le stock »).
 
-Les **modules par utilisateur** (voir [GUIDE-APPLICATIONS.md](GUIDE-APPLICATIONS.md)) restent disponibles pour masquer des écrans à une personne précise.
+Les **modules par utilisateur** (*Settings → Users → ✎ → Modules*) servent à ouvrir ou fermer des écrans pour une personne précise : un module coché lui donne l'accès de base même si son rôle ne l'a pas (voir [GUIDE-APPLICATIONS.md](GUIDE-APPLICATIONS.md)). Ils ne s'appliquent pas à l'administrateur.
 
 ---
 

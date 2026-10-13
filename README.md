@@ -164,6 +164,7 @@ Planifiez une sauvegarde quotidienne (Planificateur de tâches Windows ou cron) 
 |---|---|
 | `Access denied for user 'root'` pendant `db:init` | Vérifiez `DB_ROOT_PASSWORD`. Sous Linux, root utilise parfois `auth_socket` : `sudo mysql -e "ALTER USER root@localhost IDENTIFIED WITH caching_sha2_password BY 'motdepasse'"`. |
 | `You do not have the SUPER privilege… log_bin_trust_function_creators` | Lancez `db:init` avec le compte root, ou exécutez `SET GLOBAL log_bin_trust_function_creators = 1;` une fois. |
+| `Access denied for user 'root'… (using password: NO)` pendant `db:migrate` | Le mot de passe root n'est pas dans `backend/.env`. Saisissez-le quand `db:migrate` le demande, ou dans PowerShell : `$env:DB_ROOT_PASSWORD="motdepasse"` puis `npm run db:migrate`. |
 | `ECONNREFUSED 127.0.0.1:3306` | Le service MySQL n'est pas démarré (Windows : Services → MySQL80 → Démarrer ; Linux : `sudo service mysql start`). |
 | Port 4000 déjà utilisé | Changez `PORT` dans `backend/.env`. |
 | Page blanche après `npm start` | Lancez `npm run build` d'abord. |

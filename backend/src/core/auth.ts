@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { AppError } from './errors.js';
 import { queryOne } from './db.js';
-import { effectivePermissions, parseModules } from './modules.js';
+import { ACCESS_COLUMNS, userPermissions } from './modules.js';
 
 export interface AuthUser {
   id: number;
@@ -36,13 +36,13 @@ export async function loadAccess(id: number): Promise<AuthUser | null> {
   const hit = accessCache.get(id);
   if (hit && Date.now() - hit.at < ACCESS_TTL_MS) return hit.user;
   const u = await queryOne<any>(
-    `SELECT u.id, u.username, u.is_active, u.modules, r.code AS role, r.permissions
+    `SELECT u.id, u.username, u.is_active, ${ACCESS_COLUMNS}
        FROM users u JOIN roles r ON r.id = u.role_id WHERE u.id = ?`,
     [id],
   );
   const user: AuthUser | null =
     u && u.is_active
-      ? { id: u.id, username: u.username, role: u.role, permissions: effectivePermissions(u.permissions, parseModules(u.modules)) }
+      ? { id: u.id, username: u.username, role: u.role, permissions: userPermissions(u) }
       : null;
   accessCache.set(id, { at: Date.now(), user });
   return user;
